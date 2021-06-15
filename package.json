@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alibaba/kiwi.git"
+    "url": "git+https://github.com/zhuqingguang/kiwi.git"
   },
   "author": "linhuiw",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alibaba/kiwi/issues"
+    "url": "https://github.com/zhuqingguang/kiwi/issues"
   },
-  "homepage": "https://github.com/alibaba/kiwi#readme"
+  "homepage": "https://github.com/zhuqingguang/kiwi#readme"
 }

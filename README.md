@@ -3,7 +3,7 @@
   <h2>🐤 Kiwi-国际化全流程解决方案</h2>
 </div>
 
-中文 | [English](https://github.com/alibaba/kiwi/blob/master/README-en.md)
+中文 | [English](https://github.com/zhuqingguang/kiwi/blob/master/README-en.md)
 
 ## 如何使用
 
@@ -25,11 +25,11 @@
 ## 使用文档及 API
 可以到对应子目录中查看：
 
-`kiwi-intl`: [📝 文档链接](https://github.com/alibaba/kiwi/tree/master/kiwi-intl)
+`kiwi-intl`: [📝 文档链接](https://github.com/zhuqingguang/kiwi/tree/master/kiwi-intl)
 
-`kiwi-cli`: [📝 文档链接](https://github.com/alibaba/kiwi/tree/master/kiwi-cli)
+`kiwi-cli`: [📝 文档链接](https://github.com/zhuqingguang/kiwi/tree/master/kiwi-cli)
 
-`kiwi-linter`: [📝 文档链接](https://github.com/alibaba/kiwi/tree/master/kiwi-linter)
+`kiwi-linter`: [📝 文档链接](https://github.com/zhuqingguang/kiwi/tree/master/kiwi-linter)
 
 ## 为什么使用 kiwi？
 

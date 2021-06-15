@@ -3,7 +3,7 @@
   <h2>🐤 Kiwi - Well-established internationalization solution</h2>
 </div>
 
-[中文](https://github.com/alibaba/kiwi) | English
+[中文](https://github.com/zhuqingguang/kiwi) | English
 
 ## Installation
 
@@ -30,11 +30,11 @@ Then search "kiwi linter" in visual studio marketplace
 
 ## Documentation
 
-`kiwi-intl`: [📝 Link](https://github.com/alibaba/kiwi/tree/master/kiwi-intl)
+`kiwi-intl`: [📝 Link](https://github.com/zhuqingguang/kiwi/tree/master/kiwi-intl)
 
-`kiwi-cli`: [📝 Link](https://github.com/alibaba/kiwi/tree/master/kiwi-cli)
+`kiwi-cli`: [📝 Link](https://github.com/zhuqingguang/kiwi/tree/master/kiwi-cli)
 
-`kiwi-linter`: [📝 Link](https://github.com/alibaba/kiwi/tree/master/kiwi-linter)
+`kiwi-linter`: [📝 Link](https://github.com/zhuqingguang/kiwi/tree/master/kiwi-linter)
 
 
 
@@ -73,7 +73,7 @@ We also developed a tslint package, that will help developers detect the untrans
 
 - Alibaba
 
-It's happy to let us know that you and your company are using kiwi right now,  please leave us a message in [issue](https://github.com/alibaba/kiwi/issues) .
+It's happy to let us know that you and your company are using kiwi right now,  please leave us a message in [issue](https://github.com/zhuqingguang/kiwi/issues) .
 
 
 

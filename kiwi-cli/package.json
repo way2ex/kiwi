@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/alibaba/kiwi.git"
+    "url": "git+ssh://git@github.com/zhuqingguang/kiwi.git"
   },
   "keywords": [
     "cli",
@@ -22,9 +22,9 @@
   "author": "linhuiw",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/alibaba/kiwi/issues"
+    "url": "https://github.com/zhuqingguang/kiwi/issues"
   },
-  "homepage": "https://github.com/alibaba/kiwi#readme",
+  "homepage": "https://github.com/zhuqingguang/kiwi#readme",
   "dependencies": {
     "@angular/compiler": "^7.2.0",
     "@babel/core": "^7.5.5",
