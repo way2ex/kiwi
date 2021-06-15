@@ -41,31 +41,17 @@ export class Position {
 function getRegexMatches(I18N, code: string) {
   const lines = code.split('\n');
   const positions: Position[] = [];
-  /** 匹配{{I18N.}} */
-  const reg = new RegExp(/I18N.(.*)/);
-  const normalReg = new RegExp(/I18N.(.*)/);
-  (lines || []).map((line, index) => {
+  const reg = new RegExp(/I18N((?:\.[$\w]+|\[(?:'|")[^'"\[\]]+(?:'|")\])+)/);
+  lines.forEach((line, index) => {
     const match = reg.exec(line);
-    let exps = _.get(match, [1]);
-    if (!exps) {
-      exps = _.get(normalReg.exec(line), [1]);
-    }
-    if (exps) {
-      exps = exps.trim();
-      exps = exps.split('}')[0];
-      exps = exps.split(')')[0];
-      exps = exps.split(',')[0];
-      exps = exps.split(';')[0];
-      exps = exps.split('"')[0];
-      exps = exps.split("'")[0];
-      exps = exps.split(' ')[0];
-      const code = `I18N.${exps}`;
+    if (match) {
       const position = new Position();
-      const transformedCn = _.get(I18N, exps.split('.'));
+      const keyPath = match[1].startsWith('.') ? match[1].slice(1) : match[1];
+      const transformedCn = _.get(I18N, keyPath);
       if (typeof transformedCn === 'string') {
         position.cn = transformedCn;
         (position as any).line = index;
-        position.code = code;
+        position.code = match[0];
         positions.push(position);
       }
     }

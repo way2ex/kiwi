@@ -81,8 +81,12 @@ export const getAllFiles = dir =>
  */
 export function getLangJson(fileName) {
   const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
-  let obj = fileContent.match(/export\s*default\s*({[\s\S]+);?$/)[1];
-  obj = obj.replace(/\s*;\s*$/, '');
+  const matchRes = fileContent.match(/export\s*default\s*({[\s\S]+);?$/);
+  if (!matchRes || !matchRes[1]) {
+    return {};
+  }
+  let obj = matchRes[1];
+  obj = obj.replace(/\s*;\s*$/, '').replace(/\.\.\.\w+,?/, '');
   let jsObj = {};
   try {
     jsObj = eval('(' + obj + ')');
@@ -97,7 +101,7 @@ export function getLangJson(fileName) {
  * 获取配置，支持从vscode和配置文件(优先)中取到配置项
  */
 export const getConfiguration = text => {
-  let value = vscode.workspace.getConfiguration('vscode-i18n-linter').get(text);
+  let value = vscode.workspace.getConfiguration('better-i18n-linter').get(text);
   let kiwiConfigJson = getConfigFile();
   if (!kiwiConfigJson) {
     return value;
@@ -213,17 +217,23 @@ export function translateText(text) {
 /**
  * 获取多项目配置
  */
-export function getTargetLangPath(currentFilePath) {
+export function getTargetLangPath(currentFilePath): string | string[] {
   const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwi`;
   let targetLangPath = '';
 
   try {
     if (fs.existsSync(configFile)) {
       const { projects = [] } = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-      console.log(projects);
+      // console.log(projects);
       for (const config of projects) {
         if (currentFilePath.indexOf(`/${config.target}/`) > -1) {
-          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${config.kiwiDir}/zh_CN/`;
+          if (Array.isArray(config.kiwiDir)) {
+            targetLangPath = config.kiwiDir.map(
+              dir => `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${dir}/zh-CN/`
+            );
+          } else {
+            targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${config.kiwiDir}/zh-CN/`;
+          }
           return targetLangPath;
         }
       }
@@ -239,12 +249,14 @@ export function getTargetLangPath(currentFilePath) {
  * 获取当前文件对应的项目路径
  */
 export function getCurrentProjectLangPath() {
-  let currentProjectLangPath = '';
   const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
-  if (targetLangPath) {
-    currentProjectLangPath = `${targetLangPath}**/*.ts`;
+  if (Array.isArray(targetLangPath)) {
+    return `{${targetLangPath.join(',')}}**/*.{ts,js}`;
   }
-  return currentProjectLangPath;
+  if (targetLangPath) {
+    return `${targetLangPath}**/*.{ts,js}`;
+  }
+  return '';
 }
 
 /**
@@ -252,5 +264,5 @@ export function getCurrentProjectLangPath() {
  */
 export function getLangPrefix() {
   const langPrefix = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
-  return langPrefix;
+  return Array.isArray(langPrefix) ? langPrefix.pop() || '' : langPrefix;
 }

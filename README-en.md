@@ -59,7 +59,7 @@ Kiwi is not just an library for front-end internationalization, it's a full life
 
 Kiwi is based on kiwi-intl. you can use kiwi in any front-end library you like.
 
-Developers can use kiwi linter for automatic batch Chinese text converting. We have provided [a plugin for vscode](https://marketplace.visualstudio.com/items?itemName=undefinedvs.vscode-i18n-linter) to prompt the original text next to the translation key. Of course you can search the Chinese translation in project, and jump to the relevant code. Kiwi has improved the bad feeling be brougth by the missing text.
+Developers can use kiwi linter for automatic batch Chinese text converting. We have provided [a plugin for vscode](https://marketplace.visualstudio.com/items?itemName=undefinedvs.better-i18n-linter) to prompt the original text next to the translation key. Of course you can search the Chinese translation in project, and jump to the relevant code. Kiwi has improved the bad feeling be brougth by the missing text.
 
 Kiwi also helps developers to collect all the text without translation. They will be packed to an Excel, and you can mail it to your translation partners. We also built in google translation in our kiwi linter plugin, which allows developers to translate quickly before the translation team finish their jobs. That is really time saving.
 

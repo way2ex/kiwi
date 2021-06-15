@@ -33,7 +33,6 @@ const annotationDecoration: TextEditorDecorationType = window.createTextEditorDe
  */
 export function transformPosition(pos: Position, editorText: string, toLastCol?: boolean) {
   const { start, code } = pos;
-
   const width = code.length;
   let lines, line, ch;
   if (start !== undefined) {
@@ -67,6 +66,7 @@ export function transformPosition(pos: Position, editorText: string, toLastCol?:
 export function setLineDecorations(activeEditor) {
   const code = activeEditor.document.getText();
   const positions = findI18NPositions(code);
+  console.log('positions', positions);
   let decorations = [];
   decorations = (positions || []).map(pos => {
     const toLastCol = true;

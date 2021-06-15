@@ -58,7 +58,7 @@ function getDefaultDir() {
 
 const LANG_PREFIX = getDefaultDir();
 const DIR_ADAPTOR = dirAdaptor();
-const I18N_GLOB = `${LANG_PREFIX}**/*.ts`;
+const I18N_GLOB = `${LANG_PREFIX}**/*.{ts,js}`;
 const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
 
 export { LANG_PREFIX, I18N_GLOB, DOUBLE_BYTE_REGEX, DIR_ADAPTOR };

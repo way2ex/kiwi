@@ -17,7 +17,7 @@ kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮�
 
 ## 配置项
 
-### vscode-i18n-linter.langPrefix
+### better-i18n-linter.langPrefix
 
 default: `.kiwi/zh-CN/`
 
@@ -25,19 +25,19 @@ default: `.kiwi/zh-CN/`
 可以参考的目录结构如下:
 ![示例目录结构](./assets/i18n-folder-structure.gif)
 
-### vscode-i18n-linter.i18nFilesPattern
+### better-i18n-linter.i18nFilesPattern
 
 default: `**/src/**/ts*`
 
 待扫描的文件类型，可以基于 [minimatch](https://github.com/isaacs/minimatch) 规则进行自定义。
 
-### vscode-i18n-linter.markStringLiterals
+### better-i18n-linter.markStringLiterals
 
 default: `true`
 
 是否标红中文字符串，默认开启。
 
-### vscode-i18n-linter.showOverviewRuler
+### better-i18n-linter.showOverviewRuler
 
 default: `true`
 
@@ -45,13 +45,13 @@ default: `true`
 
 ![](https://img.alicdn.com/tfs/TB1CHZRrxGYBuNjy0FnXXX5lpXa-1088-568.png)
 
-### vscode-i18n-linter.markColor
+### better-i18n-linter.markColor
 
 default: `#ff4400`
 
 待提取文字，高亮颜色。
 
-### vscode-i18n-linter.enableReplaceSuggestion
+### better-i18n-linter.enableReplaceSuggestion
 
 default: `true`
 

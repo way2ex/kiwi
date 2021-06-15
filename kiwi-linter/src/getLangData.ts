@@ -21,25 +21,13 @@ export function getLangData(fileName: string) {
 export function getI18N() {
   const _I18N_GLOB = getCurrentProjectLangPath() || I18N_GLOB;
   const paths = globby.sync(_I18N_GLOB);
-  const langObj = paths.reduce((prev, curr) => {
-    const filename = curr
-      .split('/')
-      .pop()
-      .replace(/\.tsx?$/, '');
-    if (filename.replace(/\.tsx?/, '') === 'index') {
-      return prev;
-    }
-
+  let langObj = {};
+  langObj = paths.reduce((prev, curr) => {
     const fileContent = getLangData(curr);
     let jsObj = fileContent;
-
-    if (Object.keys(jsObj).length === 0) {
-      vscode.window.showWarningMessage(`\`${curr}\` 解析失败，该文件包含的文案无法自动补全`);
-    }
-
     return {
       ...prev,
-      [filename]: jsObj
+      ...jsObj
     };
   }, {});
   return langObj;

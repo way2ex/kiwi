@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
     return;
   }
   console.log('Congratulations, your extension "kiwi-linter" is now active!');
-  context.subscriptions.push(vscode.commands.registerCommand('vscode-i18n-linter.findAllI18N', findAllI18N));
+  context.subscriptions.push(vscode.commands.registerCommand('better-i18n-linter.findAllI18N', findAllI18N));
   let targetStrs: TargetStr[] = [];
   let finalLangObj = {};
 
@@ -58,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
       suggestion = [dir, fileKey];
     }
   }
-  context.subscriptions.push(vscode.commands.registerTextEditorCommand('vscode-i18n-linter.findI18N', findI18N));
+  context.subscriptions.push(vscode.commands.registerTextEditorCommand('better-i18n-linter.findI18N', findI18N));
 
   // 识别到出错时点击小灯泡弹出的操作
   const hasLightBulb = getConfiguration('enableReplaceSuggestion');
@@ -85,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (finalLangObj[key] === text) {
                   actions.push({
                     title: `抽取为 \`I18N.${key}\``,
-                    command: 'vscode-i18n-linter.extractI18N',
+                    command: 'better-i18n-linter.extractI18N',
                     arguments: [
                       {
                         targets: sameTextStrs,
@@ -98,7 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
 
               return actions.concat({
                 title: `抽取为自定义 I18N 变量（共${sameTextStrs.length}处）`,
-                command: 'vscode-i18n-linter.extractI18N',
+                command: 'better-i18n-linter.extractI18N',
                 arguments: [
                   {
                     targets: sameTextStrs
@@ -114,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 点击小灯泡后进行替换操作
   context.subscriptions.push(
-    vscode.commands.registerCommand('vscode-i18n-linter.extractI18N', args => {
+    vscode.commands.registerCommand('better-i18n-linter.extractI18N', args => {
       return new Promise(resolve => {
         // 若变量名已确定则直接开始替换
         if (args.varName) {
@@ -160,7 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 使用 cmd + shift + p 执行的公共文案替换
   context.subscriptions.push(
-    vscode.commands.registerCommand('vscode-i18n-linter.replaceCommon', () => {
+    vscode.commands.registerCommand('better-i18n-linter.replaceCommon', () => {
       const commandKeys = Object.keys(finalLangObj).filter(k => k.includes('common.'));
       if (targetStrs.length === 0 || commandKeys.length === 0) {
         vscode.window.showInformationMessage('没有找到可替换的公共文案');
@@ -212,7 +212,7 @@ export function activate(context: vscode.ExtensionContext) {
   const virtualMemory = {};
   // 一键替换所有中文
   context.subscriptions.push(
-    vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
+    vscode.commands.registerCommand('better-i18n-linter.kiwigo', () => {
       if (targetStrs.length === 0) {
         vscode.window.showInformationMessage('没有找到可替换的文案');
         return;
