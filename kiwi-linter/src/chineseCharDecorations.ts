@@ -15,14 +15,14 @@ function getChineseCharDecoration() {
   // 配置提示框样式
   const hasOverviewRuler = getConfiguration('showOverviewRuler');
   const shouldMark = getConfiguration('markStringLiterals');
-  const color = getConfiguration('markColor');
+  const color = getConfiguration('markColor') as string;
   return vscode.window.createTextEditorDecorationType({
     borderWidth: shouldMark ? '1px' : undefined,
     borderStyle: shouldMark ? 'dotted' : undefined,
     overviewRulerColor: hasOverviewRuler ? color : undefined,
     overviewRulerLane: hasOverviewRuler ? vscode.OverviewRulerLane.Right : undefined,
     light: {
-      borderColor: shouldMark ? color : undefined
+      borderColor: shouldMark ? color: undefined
     },
     dark: {
       borderColor: shouldMark ? color : undefined
@@ -30,14 +30,14 @@ function getChineseCharDecoration() {
   });
 }
 
-let timeout = null;
-let prevChineseCharDecoration = null;
+let timeout;
+let prevChineseCharDecoration: vscode.TextEditorDecorationType;
 export function triggerUpdateDecorations(callback?) {
   if (timeout) {
     clearTimeout(timeout);
   }
   timeout = setTimeout(() => {
-    const activeEditor = vscode.window.activeTextEditor;
+    const activeEditor = vscode.window.activeTextEditor!;
     if (prevChineseCharDecoration) {
       /** 清除原有的提示 */
       activeEditor.setDecorations(prevChineseCharDecoration, []);
@@ -45,7 +45,7 @@ export function triggerUpdateDecorations(callback?) {
     if (!matchPattern()) {
       return;
     }
-    const { targetStrs, chineseCharDecoration } = updateDecorations();
+    const { targetStrs, chineseCharDecoration } = updateDecorations()!;
     prevChineseCharDecoration = chineseCharDecoration;
     callback(targetStrs);
   }, 500);
@@ -55,13 +55,13 @@ export function triggerUpdateDecorations(callback?) {
  * 查看文件名是否匹配
  */
 function matchPattern() {
-  const activeEditor = vscode.window.activeTextEditor;
+  const activeEditor = vscode.window.activeTextEditor!;
   const pattern = getConfiguration('i18nFilesPattern');
   if (
     activeEditor &&
     pattern !== '' &&
     !minimatch(
-      activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders[0].uri.fsPath + '/', ''),
+      activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders![0].uri.fsPath + '/', ''),
       pattern
     )
   ) {
@@ -74,7 +74,7 @@ function matchPattern() {
  * 更新标记
  */
 export function updateDecorations() {
-  const activeEditor = vscode.window.activeTextEditor;
+  const activeEditor = vscode.window.activeTextEditor!;
   const currentFilename = activeEditor.document.fileName;
   const chineseCharDecoration = getChineseCharDecoration();
   if (!activeEditor) {
@@ -83,7 +83,7 @@ export function updateDecorations() {
 
   const text = activeEditor.document.getText();
   // 清空上一次的保存结果
-  let targetStrs = [];
+  let targetStrs: any[] = [];
   let chineseChars: vscode.DecorationOptions[] = [];
 
   targetStrs = findChineseText(text, currentFilename);
@@ -96,7 +96,7 @@ export function updateDecorations() {
   });
 
   const shouldMark = getConfiguration('markStringLiterals');
-  if (shouldMark !== true) {
+  if (!!shouldMark !== true) {
     return;
   }
 

@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 
 export function trimWhiteSpace(code: string, startPos: vscode.Position, endPos: vscode.Position) {
   const lines = code.split('\n');
-  const hasContentLines = [];
+  const hasContentLines: number[] = [];
   const columnOfLine = {};
   for (let i = startPos.line; i <= endPos.line; i++) {
     const line = lines[i];

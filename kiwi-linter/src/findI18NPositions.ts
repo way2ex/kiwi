@@ -32,8 +32,11 @@ class Cache {
 const cache = new Cache();
 
 export class Position {
+  // @ts-ignore
   start: number;
+  // @ts-ignore
   cn: string;
+  // @ts-ignore
   code: string;
 }
 
@@ -74,7 +77,7 @@ export function findI18NPositions(code: string) {
 
   const regexMatches = getRegexMatches(I18N, code);
   let matchPositions = positions.concat(regexMatches);
-  matchPositions = _.uniqBy(matchPositions, (position: Position & { line: number }) => {
+  matchPositions = _.uniqBy<Position & { line: number }>(matchPositions as any, (position: Position & { line: number }) => {
     return `${position.code}-${position.line}`;
   });
 

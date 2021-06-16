@@ -13,12 +13,12 @@ import { updateLangFiles } from './file';
  * @param validateDuplicate 是否校验文件中已经存在要写入的 key
  */
 export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate: boolean): Thenable<any> {
-  let activeEditor = vscode.window.activeTextEditor;
+  let activeEditor = vscode.window.activeTextEditor!;
   const currentFilename = activeEditor.document.fileName;
   const isHtmlFile = currentFilename.endsWith('.html');
   const isVueFile = currentFilename.endsWith('.vue');
   const edit = new vscode.WorkspaceEdit();
-  const { document } = vscode.window.activeTextEditor;
+  const { document } = vscode.window.activeTextEditor!;
   let finalReplaceText = arg.text;
   // 若是字符串，删掉两侧的引号
   if (arg.isString) {

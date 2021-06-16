@@ -66,7 +66,7 @@ export function findMatchKey(langObj, text) {
  * @return {string[]} Array with all file names that are inside the directory.
  */
 export const getAllFiles = dir =>
-  fs.readdirSync(dir).reduce((files, file) => {
+  fs.readdirSync(dir).reduce<string[]>((files, file) => {
     // 避免读取node_modules造成性能问题
     if (file === 'node_modules') {
       return [...files];
@@ -101,7 +101,7 @@ export function getLangJson(fileName) {
  * 获取配置，支持从vscode和配置文件(优先)中取到配置项
  */
 export const getConfiguration = text => {
-  let value = vscode.workspace.getConfiguration('better-i18n-linter').get(text);
+  let value = vscode.workspace.getConfiguration('better-i18n-linter').get(text) as string;
   let kiwiConfigJson = getConfigFile();
   if (!kiwiConfigJson) {
     return value;
@@ -117,10 +117,10 @@ export const getConfiguration = text => {
  * 查找kiwi-cli配置文件
  */
 export const getConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwirc.js`;
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwirc.js`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
-    kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwirc.ts`;
+    kiwiConfigJson = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwirc.ts`;
     //再找ts
     if (!fs.existsSync(kiwiConfigJson)) {
       return null;
@@ -133,7 +133,7 @@ export const getConfigFile = () => {
  * 查找kiwi-linter配置文件
  */
 export const getKiwiLinterConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwi`;
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
     return null;
@@ -145,7 +145,7 @@ export const getKiwiLinterConfigFile = () => {
  * 获得项目配置信息中的 googleApiKey
  */
 function getGoogleApiKey() {
-  const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwi`;
+  const configFile = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
   let googleApiKey = '';
 
   try {
@@ -218,7 +218,7 @@ export function translateText(text) {
  * 获取多项目配置
  */
 export function getTargetLangPath(currentFilePath): string | string[] {
-  const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwi`;
+  const configFile = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
   let targetLangPath = '';
 
   try {
@@ -229,10 +229,10 @@ export function getTargetLangPath(currentFilePath): string | string[] {
         if (currentFilePath.indexOf(`/${config.target}/`) > -1) {
           if (Array.isArray(config.kiwiDir)) {
             targetLangPath = config.kiwiDir.map(
-              dir => `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${dir}/zh-CN/`
+              dir => `${vscode.workspace.workspaceFolders![0].uri.fsPath}/${dir}/zh-CN/`
             );
           } else {
-            targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${config.kiwiDir}/zh-CN/`;
+            targetLangPath = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/${config.kiwiDir}/zh-CN/`;
           }
           return targetLangPath;
         }
@@ -249,7 +249,7 @@ export function getTargetLangPath(currentFilePath): string | string[] {
  * 获取当前文件对应的项目路径
  */
 export function getCurrentProjectLangPath() {
-  const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
+  const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path);
   if (Array.isArray(targetLangPath)) {
     return `{${targetLangPath.join(',')}}**/*.{ts,js}`;
   }
@@ -263,6 +263,6 @@ export function getCurrentProjectLangPath() {
  * 获取当前文件对应的语言路径
  */
 export function getLangPrefix() {
-  const langPrefix = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
+  const langPrefix = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path);
   return Array.isArray(langPrefix) ? langPrefix.pop() || '' : langPrefix;
 }

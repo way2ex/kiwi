@@ -67,7 +67,7 @@ export function setLineDecorations(activeEditor) {
   const code = activeEditor.document.getText();
   const positions = findI18NPositions(code);
   console.log('positions', positions);
-  let decorations = [];
+  let decorations: DecorationOptions[] = [];
   decorations = (positions || []).map(pos => {
     const toLastCol = true;
     const range = transformPosition(pos, code, toLastCol);

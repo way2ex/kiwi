@@ -16,8 +16,8 @@ import * as compilerVue from 'vue-template-compiler';
  */
 
 function findTextInTs(code: string, fileName: string) {
-  const matches = [];
-  const activeEditor = vscode.window.activeTextEditor;
+  const matches: unknown[] = [];
+  const activeEditor = vscode.window.activeTextEditor!;
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   function visit(node: ts.Node) {
@@ -112,8 +112,8 @@ function findTextInTs(code: string, fileName: string) {
   return matches;
 }
 function findTextInVueTs(code: string, fileName: string, startNum: number) {
-  const matches = [];
-  const activeEditor = vscode.window.activeTextEditor;
+  const matches: unknown[] = [];
+  const activeEditor = vscode.window.activeTextEditor!;
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
 
   function visit(node: ts.Node) {
@@ -168,8 +168,8 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
  * @param code
  */
 function findTextInHtml(code) {
-  const matches = [];
-  const activeEditor = vscode.window.activeTextEditor;
+  const matches: unknown[] = [];
+  const activeEditor = vscode.window.activeTextEditor!;
   const ast = compiler.parseTemplate(code, 'ast.html', {
     preserveWhitespaces: false
   });
@@ -257,14 +257,14 @@ function findTextInVue(code, fileName) {
   let coverRex1 = new RegExp(/ccsp&;/, 'g');
   let coverRex2 = new RegExp(/ecsp&;/, 'g');
   let coverRex3 = new RegExp(/ncsp&;/, 'g');
-  const activeTextEditor = vscode.window.activeTextEditor;
-  const matches = [];
+  const activeTextEditor = vscode.window.activeTextEditor!;
+  const matches: unknown[] = [];
   var result;
   const { document } = activeTextEditor;
   const vueObejct = compilerVue.compile(code.toString(), { outputSourceRange: true });
   let vueAst = vueObejct.ast;
   let expressTemp = findVueText(vueAst);
-  expressTemp.forEach(item => {
+  (expressTemp as any[]).forEach(item => {
     const nodeValue = code.slice(item.start, item.end);
     let startPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + 1);
     let endPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + (item.text.length - 1));
@@ -277,7 +277,7 @@ function findTextInVue(code, fileName) {
     });
   });
   let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
-  let vueTemp = transerI18n(outcode, 'as.vue', null);
+  let vueTemp: string[] = transerI18n(outcode, 'as.vue', null);
   /**删除所有的html中的头部空格 */
   vueTemp = vueTemp.map(item => {
     return item.trim();
@@ -315,7 +315,7 @@ function findTextInVue(code, fileName) {
       });
     }
   });
-  let matchesTemp = matches;
+  let matchesTemp: any[] = matches;
   let matchesTempResult = matchesTemp.filter((item, index) => {
     let canBe = true;
     matchesTemp.forEach(items => {
@@ -327,10 +327,10 @@ function findTextInVue(code, fileName) {
         canBe = false;
       }
     });
-    if (canBe) return item;
+    if (canBe) {return item;}
   });
-  const sfc = compilerVue.parseComponent(code.toString());
-  return matchesTempResult.concat(findTextInVueTs(sfc.script.content, fileName, sfc.script.start));
+  const sfc: compilerVue.SFCDescriptor = compilerVue.parseComponent(code.toString());
+  return matchesTempResult.concat(findTextInVueTs(sfc.script!.content, fileName, sfc.script!.start!));
 }
 /**
  * 递归匹配代码的中文

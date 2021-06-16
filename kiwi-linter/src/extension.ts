@@ -80,7 +80,7 @@
 			 if (targetStr) {
 			   const sameTextStrs = targetStrs.filter(t => t.text === targetStr.text);
 			   const text = targetStr.text;
-			   const actions = [];
+			   const actions: unknown[] = [];
 			   finalLangObj = getSuggestLangObj();
 			   for (const key of Object.keys(finalLangObj)) {
 				 if (finalLangObj[key] === text) {
@@ -105,7 +105,7 @@
 					targets: sameTextStrs
 				  }
 				]
-			  }];
+			  }] as any;
 			 }
 		   }
 		 }
@@ -168,7 +168,7 @@
 		 return;
 	   }
  
-	   const replaceableStrs = targetStrs.reduce((prev, curr) => {
+	   const replaceableStrs: any[] = targetStrs.reduce<any>((prev, curr) => {
 		 const key = findMatchKey(finalLangObj, curr.text);
 		 if (key && key.startsWith('common.')) {
 		   return prev.concat({
@@ -228,12 +228,12 @@
 			   // 避免翻译的字符里包含数字或者特殊字符等情况
 			   const reg = /[^a-zA-Z\x00-\xff]+/g;
 			   const findText = curr.text.match(reg);
-			   const transText = findText.join('').slice(0, 4);
+			   const transText = findText!.join('').slice(0, 4);
 			   return prev.concat(translateText(transText));
 			 }, []);
  
 			 Promise.all(translatePromises).then(([...translateTexts]) => {
-			   const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
+			   const replaceableStrs: any[] = targetStrs.reduce<any>((prev, curr, i) => {
 				 const key = findMatchKey(finalLangObj, curr.text);
 				 if (!virtualMemory[curr.text]) {
 				   if (key) {
@@ -296,7 +296,7 @@
    // 当 切换文档 的时候重新检测当前文档中的中文文案
    context.subscriptions.push(
 	 vscode.window.onDidChangeActiveTextEditor(editor => {
-	   activeEditor = editor;
+	   activeEditor = editor!;
 	   if (editor) {
 		 triggerUpdateDecorations(newTargetStrs => {
 		   targetStrs = newTargetStrs;

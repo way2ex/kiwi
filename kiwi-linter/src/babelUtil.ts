@@ -9,7 +9,7 @@ function transerI18n(code, filename, lang) {
   }
 }
 function typescriptI18n(code, fileName) {
-  let arr = [];
+  let arr: string[] = [];
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
   function visit(node: ts.Node) {
     switch (node.kind) {
@@ -28,7 +28,7 @@ function typescriptI18n(code, fileName) {
   return arr;
 }
 function javascriptI18n(code, filename) {
-  let arr = [];
+  let arr: string[] = [];
   let visitor = {
     StringLiteral(path) {
       if (path.node.value.match(DOUBLE_BYTE_REGEX)) {
@@ -45,7 +45,7 @@ function javascriptI18n(code, filename) {
 }
 //必须将模板语法中的所有待翻译语句翻译完成才能进行ast的string解析
 function findVueText(ast) {
-  let arr = [];
+  let arr: unknown[] = [];
   const regex1 = /\`(.+?)\`/g;
   function emun(ast) {
     if (ast.expression) {
