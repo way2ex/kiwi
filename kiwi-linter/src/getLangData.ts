@@ -2,7 +2,6 @@
  * @author linhuiw
  * @desc 获取语言文件
  */
-import * as vscode from 'vscode';
 import { flatten, getLangJson, getCurrentProjectLangPath } from './utils';
 import * as globby from 'globby';
 import * as fs from 'fs';
@@ -35,7 +34,7 @@ export function getI18N() {
 /**
  * 获取全部语言, 展平
  */
-export function getSuggestLangObj() {
+export function getSuggestLangObj(): Record<string, string> {
   const langObj = getI18N();
   const finalLangObj = flatten(langObj) as any;
   return finalLangObj;

@@ -45,7 +45,7 @@ export function updateLangFiles(keyValue: string, text: string, validateDuplicat
  * 使用 Prettier 格式化文件
  * @param fileContent
  */
-function prettierFile(fileContent) {
+function prettierFile(fileContent: string) {
   try {
     return prettier.format(fileContent, {
       parser: 'typescript',

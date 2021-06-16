@@ -1,135 +1,145 @@
 {
-  "name": "better-i18n-linter",
-  "displayName": "better-i18n-linter",
-  "description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
-  "version": "1.4.1",
-  "publisher": "justin",
-  "engines": {
-    "vscode": "^1.18.0"
-  },
-  "categories": [
-    "Other",
-    "Linters"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/zhuqingguang/kiwi"
-  },
-  "activationEvents": [
-    "onLanguage:typescript",
-    "onLanguage:typescriptreact",
-    "onLanguage:javascriptreact",
-    "onLanguage:javascript",
-    "onLanguage:html",
-    "onLanguage:vue",
-    "onCommand:better-i18n-linter.replaceCommon",
-    "onCommand:better-i18n-linter.findI18N",
-    "onCommand:better-i18n-linter.findAllI18N"
-  ],
-  "main": "./out/extension",
-  "icon": "icon.png",
-  "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "I18N Linter",
-      "properties": {
-        "better-i18n-linter.markStringLiterals": {
-          "type": "boolean",
-          "default": true,
-          "description": "Mark string literals in editor so you can quickly spot on them"
-        },
-        "better-i18n-linter.langPrefix": {
-          "type": "string",
-          "default": ".kiwi/zh-CN/",
-          "description": "Language store path"
-        },
-        "better-i18n-linter.showOverviewRuler": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show non-English letter position on the overview ruler"
-        },
-        "better-i18n-linter.markColor": {
-          "type": "string",
-          "default": "#f40",
-          "description": "The color of matched non-English letters"
-        },
-        "better-i18n-linter.enableReplaceSuggestion": {
-          "type": "boolean",
-          "default": true,
-          "description": "Add a light blob beside string literal and provide I18N variable replacement suggestions"
-        },
-        "better-i18n-linter.i18nFilesPattern": {
-          "type": "string",
-          "default": "**/src/**/*.+(vue|js*|html|ts*)",
-          "description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
-        }
-      }
-    },
-    "commands": [
-      {
-        "command": "better-i18n-linter.replaceCommon",
-        "title": "Replace Common String Literals to I18N variables"
-      },
-      {
-        "command": "better-i18n-linter.findI18N",
-        "title": "Search inside Current File for I18N Strings"
-      },
-      {
-        "command": "better-i18n-linter.findAllI18N",
-        "title": "Search inside All Files for I18N Strings"
-      },
-      {
-        "command": "better-i18n-linter.kiwigo",
-        "title": "Kiwi Go!"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "better-i18n-linter.findI18N",
-        "key": "cmd+ctrl+f",
-        "mac": "cmd+ctrl+f"
-      },
-      {
-        "command": "better-i18n-linter.findAllI18N",
-        "key": "cmd+ctrl+r",
-        "mac": "cmd+ctrl+r"
-      }
-    ]
-  },
-  "keywords": [
-    "React",
-    "i18n"
-  ],
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "postinstall": "node ../node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
-  },
-  "devDependencies": {
-    "@types/fs-extra": "^5.0.4",
-    "@types/mocha": "^2.2.42",
-    "@types/node": "^7.0.43",
-    "husky": "^1.3.1",
-    "vscode": "^1.1.6"
-  },
-  "dependencies": {
-    "@angular/compiler": "^7.2.0",
-    "@babel/core": "^7.5.5",
-    "@babel/types": "^7.5.5",
-    "@vue/component-compiler-utils": "^3.1.1",
-    "find-in-files": "^0.5.0",
-    "fs-extra": "^7.0.1",
-    "globby": "^7.1.1",
-    "google-translate": "^2.2.0",
-    "lodash": "^4.17.4",
-    "minimatch": "^3.0.4",
-    "prettier": "^1.16.4",
-    "randomstring": "^1.1.5",
-    "slash2": "^2.0.0",
-    "ts-node": "^6.0.3",
-    "typescript": "^2.8.3",
-    "vue-template-compiler": "^2.6.11"
-  }
+	"name": "better-i18n-linter",
+	"displayName": "better-i18n-linter",
+	"description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
+	"version": "1.4.1",
+	"engines": {
+		"vscode": "^1.57.0"
+	},
+	"categories": [
+		"Other",
+		"Linters"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/zhuqingguang/kiwi"
+	},
+	"activationEvents": [
+		"onLanguage:typescript",
+		"onLanguage:typescriptreact",
+		"onLanguage:javascriptreact",
+		"onLanguage:javascript",
+		"onLanguage:html",
+		"onLanguage:vue",
+		"onCommand:better-i18n-linter.replaceCommon",
+		"onCommand:better-i18n-linter.findI18N",
+		"onCommand:better-i18n-linter.findAllI18N"
+	],
+	"main": "./out/extension.js",
+	"icon": "icon.png",
+	"contributes": {
+		"configuration": {
+			"type": "object",
+			"title": "I18N Linter",
+			"properties": {
+				"better-i18n-linter.markStringLiterals": {
+					"type": "boolean",
+					"default": true,
+					"description": "Mark string literals in editor so you can quickly spot on them"
+				},
+				"better-i18n-linter.langPrefix": {
+					"type": "string",
+					"default": ".kiwi/zh-CN/",
+					"description": "Language store path"
+				},
+				"better-i18n-linter.showOverviewRuler": {
+					"type": "boolean",
+					"default": true,
+					"description": "Show non-English letter position on the overview ruler"
+				},
+				"better-i18n-linter.markColor": {
+					"type": "string",
+					"default": "#f40",
+					"description": "The color of matched non-English letters"
+				},
+				"better-i18n-linter.enableReplaceSuggestion": {
+					"type": "boolean",
+					"default": true,
+					"description": "Add a light blob beside string literal and provide I18N variable replacement suggestions"
+				},
+				"better-i18n-linter.i18nFilesPattern": {
+					"type": "string",
+					"default": "**/src/**/*.+(vue|js*|html|ts*)",
+					"description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
+				}
+			}
+		},
+		"commands": [
+			{
+				"command": "better-i18n-linter.replaceCommon",
+				"title": "Replace Common String Literals to I18N variables"
+			},
+			{
+				"command": "better-i18n-linter.findI18N",
+				"title": "Search inside Current File for I18N Strings"
+			},
+			{
+				"command": "better-i18n-linter.findAllI18N",
+				"title": "Search inside All Files for I18N Strings"
+			},
+			{
+				"command": "better-i18n-linter.kiwigo",
+				"title": "Kiwi Go!"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "better-i18n-linter.findI18N",
+				"key": "cmd+ctrl+f",
+				"mac": "cmd+ctrl+f"
+			},
+			{
+				"command": "better-i18n-linter.findAllI18N",
+				"key": "cmd+ctrl+r",
+				"mac": "cmd+ctrl+r"
+			}
+		]
+	},
+	"keywords": [
+		"React",
+		"i18n"
+	],
+	"scripts": {
+		"vscode:prepublish": "yarn run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "yarn run compile && yarn run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "^9.0.11",
+		"@types/glob": "^7.1.3",
+		"@types/minimatch": "^3.0.4",
+		"@types/mocha": "^8.2.2",
+		"@types/node": "14.x",
+		"@types/prettier": "^2.3.0",
+		"@types/randomstring": "^1.1.6",
+		"@types/vscode": "^1.57.0",
+		"@typescript-eslint/eslint-plugin": "^4.26.0",
+		"@typescript-eslint/parser": "^4.26.0",
+		"eslint": "^7.27.0",
+		"glob": "^7.1.7",
+		"mocha": "^8.4.0",
+		"typescript": "^4.3.2",
+		"vscode-test": "^1.5.2"
+	},
+	"dependencies": {
+		"@angular/compiler": "^7.2.0",
+		"@babel/core": "^7.5.5",
+		"@babel/types": "^7.5.5",
+		"@vue/component-compiler-utils": "^3.1.1",
+		"find-in-files": "^0.5.0",
+		"fs-extra": "^7.0.1",
+		"globby": "^7.1.1",
+		"google-translate": "^2.2.0",
+		"lodash": "^4.17.4",
+		"minimatch": "^3.0.4",
+		"prettier": "^1.16.4",
+		"randomstring": "^1.1.5",
+		"slash2": "^2.0.0",
+		"ts-node": "^6.0.3",
+		"vue-template-compiler": "^2.6.11"
+	},
+	"license": "MIT"
 }
