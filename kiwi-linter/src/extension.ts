@@ -15,13 +15,11 @@
  import { TargetStr } from './define';
  import { replaceAndUpdate } from './replaceAndUpdate';
  import { getConfiguration, getConfigFile, translateText, getKiwiLinterConfigFile } from './utils';
- 
  /**
   * 主入口文件
   * @param context
   */
  export function activate(context: vscode.ExtensionContext) {
-   console.log('cccc');
    if (!getKiwiLinterConfigFile() && !getConfigFile() && !fs.existsSync(DIR_ADAPTOR)) {
 	 /** 存在配置文件则开启 */
 	 return;
@@ -85,12 +83,12 @@
 			   for (const key of Object.keys(finalLangObj)) {
 				 if (finalLangObj[key] === text) {
 				   actions.push({
-					 title: `抽取为 \`I18N.${key}\``,
+					 title: `抽取为 \`I18N['${key}']\``,
 					 command: 'better-i18n-linter.extractI18N',
 					 arguments: [
 					   {
 						 targets: sameTextStrs,
-						 varName: `I18N.${key}`
+						 varName: `I18N['${key}']`
 					   }
 					 ]
 				   });

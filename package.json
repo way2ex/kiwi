@@ -8,7 +8,7 @@
     "kiwi-demo"
   ],
   "scripts": {
-    "watch": "cd kiwi-linter && npm run watch",
+    "test-compile": "cd kiwi-linter && npm run test-compile",
     "publish-linter": "cd kiwi-linter && vsce publish",
     "precommit": "node ./scripts/prettier.js && git add .",
     "prettier": "node ./scripts/prettier.js"

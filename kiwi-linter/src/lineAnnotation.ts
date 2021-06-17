@@ -68,7 +68,7 @@ export function setLineDecorations(activeEditor) {
   const positions = findI18NPositions(code);
   console.log('positions', positions);
   let decorations: DecorationOptions[] = [];
-  decorations = (positions || []).map(pos => {
+  decorations = (positions || []).filter(pos => pos.cn.length).map(pos => {
     const toLastCol = true;
     const range = transformPosition(pos, code, toLastCol);
     return {
@@ -76,7 +76,7 @@ export function setLineDecorations(activeEditor) {
       renderOptions: {
         after: {
           color: '#999999',
-          contentText: `🐤 🇨🇳 ${pos.cn.replace('\n', ' \\n')} 🐤`,
+          contentText: `🇨🇳 ${pos.cn.map(exp => exp.replace('\n', '\\n')).join(' | ')} 🐤`,
           fontWeight: 'normal',
           fontStyle: 'normal',
           textDecoration: 'none;'

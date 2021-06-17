@@ -42,7 +42,7 @@ export function findAllI18N() {
   const allItems = extractObject(I18NText);
   const langPrefix = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path) || LANG_PREFIX;
 
-  const getDesc = (item: Item) => item.value + ' I18N.' + item.keys.join('.');
+  const getDesc = (item: Item) => item.value + ' I18N' + item.keys.map(key => `['${key}']`).join('');
 
   vscode.window.showQuickPick(allItems.map(getDesc)).then(async selected => {
     const foundItem = allItems.find(item => getDesc(item) === selected);

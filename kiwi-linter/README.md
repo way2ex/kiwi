@@ -1,4 +1,6 @@
 # 🐤 kiwi linter
+> 本插件 fork 于[阿里巴巴的官方仓库](https://github.com/zhuqingguang/kiwi)，在其基础上进行优化与扩展，支持更灵活的使用方式。感谢阿里巴巴同学的工作，如果本仓库侵犯了您的权利，可以联系我~
+
 
 kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮出中文字符串，并一键提取中文字符串到对应的语言 Key 库。
 
@@ -6,9 +8,9 @@ kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮�
 
 ## 如何使用
 
-> VS Code 插件搜索 kiwi linter 安装
+> VS Code 插件搜索 better-i18n-linter 安装
 
-> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/zhuqingguang/kiwi)结合使用
+> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/alibaba/kiwi)结合使用
 
 
 ![演示](https://img.alicdn.com/tfs/TB1EYENfTnI8KJjy0FfXXcdoVXa-1006-368.gif)
@@ -27,7 +29,7 @@ default: `.kiwi/zh-CN/`
 
 ### better-i18n-linter.i18nFilesPattern
 
-default: `**/src/**/ts*`
+default: `**/src/**/*.+(vue|js*|html|ts*)`
 
 待扫描的文件类型，可以基于 [minimatch](https://github.com/isaacs/minimatch) 规则进行自定义。
 
@@ -56,6 +58,28 @@ default: `#ff4400`
 default: `true`
 
 是否开启一键提取中文功能。
+
+
+## 多工程支持
+> 这个是原有的功能，不过采用了配置文件的方式而不是 VS Code 配置的方式进行配置。
+支持多个文件夹使用各自不同的语言包配置，只需在项目根目录下创建 `.kiwi` 文件，写入配置即可：
+```json
+{
+    "projects": [
+        {
+            "target": "packages/package-a",
+            "kiwiDir": [
+                "packages/common/src/lang",
+                "packages/package-a/src/lang"
+            ]
+        }
+    ]
+}
+```
+- `projects.target`: string, 目标文件所在的目录前缀，内部使用 `fileUri.indexOf(target)` 的方式判断是否应用该工程配置；
+- `projects.kiwiDir`: string | string[], 中文包所在的目标目录，可以配置一个或多个；
+
+> 配置中的所有路径均为相对于工程的相对路径。
 
 ## VS code 命令
 

@@ -3,7 +3,7 @@
 	"displayName": "better-i18n-linter",
 	"publisher": "justinzhu",
 	"description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
-	"version": "1.4.1",
+	"version": "1.4.4",
 	"engines": {
 		"vscode": "^1.57.0"
 	},
@@ -26,7 +26,7 @@
 		"onCommand:better-i18n-linter.findI18N",
 		"onCommand:better-i18n-linter.findAllI18N"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"icon": "icon.png",
 	"contributes": {
 		"configuration": {
@@ -101,10 +101,13 @@
 		"i18n"
 	],
 	"scripts": {
-		"vscode:prepublish": "yarn run compile",
+		"vscode:prepublish": "webpack --mode development",
+		"webpack": "webpack --mode development",
+		"webpack-dev": "webpack --mode development --watch",
+		"test-compile": "tsc -p ./",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
-		"pretest": "yarn run compile && yarn run lint",
+		"pretest": "yarn run test-compile && yarn run lint",
 		"lint": "eslint src --ext ts",
 		"test": "node ./out/test/runTest.js"
 	},
@@ -119,11 +122,17 @@
 		"@types/vscode": "^1.57.0",
 		"@typescript-eslint/eslint-plugin": "^4.26.0",
 		"@typescript-eslint/parser": "^4.26.0",
+		"esbuild": "^0.12.9",
 		"eslint": "^7.27.0",
 		"glob": "^7.1.7",
+		"husky": "^6.0.0",
 		"mocha": "^8.4.0",
+		"ts-loader": "8.x",
 		"typescript": "^4.3.2",
-		"vscode-test": "^1.5.2"
+		"vscode-test": "^1.5.2",
+		"vue": "^2.6.14",
+		"webpack": "4.x",
+		"webpack-cli": "3.x"
 	},
 	"dependencies": {
 		"@angular/compiler": "^7.2.0",

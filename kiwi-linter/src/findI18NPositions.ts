@@ -35,7 +35,7 @@ export class Position {
   // @ts-ignore
   start: number;
   // @ts-ignore
-  cn: string;
+  cn: string[];
   // @ts-ignore
   code: string;
 }
@@ -44,22 +44,23 @@ export class Position {
 function getRegexMatches(I18N, code: string) {
   const lines = code.split('\n');
   const positions: Position[] = [];
-  const reg = new RegExp(/I18N((?:\.[$\w]+|\[(?:'|")[^'"\[\]]+(?:'|")\])+)/);
+  const reg = new RegExp(/I18N((?:\.[$\w]+|\[(?:'|")[^'"\[\]]+(?:'|")\])+)/g);
   lines.forEach((line, index) => {
-    const match = reg.exec(line);
-    if (match) {
-      const position = new Position();
+    const matchAll = [ ...line.matchAll(reg) ];
+    const position = new Position();
+    position.code = line;
+    position.cn = [];
+    (position as any).line = index;
+    for (let match of matchAll) {
       const keyPath = match[1].startsWith('.') ? match[1].slice(1) : match[1];
       const transformedCn = _.get(I18N, keyPath);
       if (typeof transformedCn === 'string') {
-        position.cn = transformedCn;
-        (position as any).line = index;
-        position.code = match[0];
-        positions.push(position);
+        position.cn.push(transformedCn) ;
       }
     }
+    positions.push(position);
   });
-  return positions;
+  return positions.filter(position => position.cn.length);
 }
 
 /**

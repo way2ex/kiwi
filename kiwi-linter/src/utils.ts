@@ -30,9 +30,9 @@ export function flatten(obj, prefix?) {
 }
 
 /**
- * 查找当前位置的 Code
+ * 查找 text 在当前code中的位置
  */
-export function findPositionInCode(text: string, code: string) {
+export function findPositionInCode(text: string, code: string): null | vscode.Position {
   const lines = code.split('\n');
   const lineNum = lines.findIndex(line => line.includes(text));
 
@@ -251,6 +251,12 @@ export function getTargetLangPath(currentFilePath): string | string[] {
 export function getCurrentProjectLangPath() {
   const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path);
   if (Array.isArray(targetLangPath)) {
+    if(targetLangPath.length === 0) {
+      return '';
+    }
+    if (targetLangPath.length === 1) {
+      return `${targetLangPath[0]}**/*.{ts,js}`;
+    }
     return `{${targetLangPath.join(',')}}**/*.{ts,js}`;
   }
   if (targetLangPath) {

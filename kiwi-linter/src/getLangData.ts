@@ -17,6 +17,11 @@ export function getLangData(fileName: string) {
     return {};
   }
 }
+
+/**
+ * 获取项目配置的所有的中文文案
+ * @returns {Object} 包含所有中文文案的对象
+ */
 export function getI18N() {
   const _I18N_GLOB = getCurrentProjectLangPath() || I18N_GLOB;
   const paths = globby.sync(_I18N_GLOB);
