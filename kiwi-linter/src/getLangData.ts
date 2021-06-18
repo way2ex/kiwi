@@ -28,7 +28,7 @@ export function getI18N() {
   let langObj = {};
   langObj = paths.reduce((prev, curr) => {
     const fileContent = getLangData(curr);
-    let jsObj = fileContent;
+    const jsObj = fileContent;
     return {
       ...prev,
       ...jsObj

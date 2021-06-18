@@ -6,6 +6,8 @@ import * as _ from 'lodash';
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as crypto from 'crypto';
+import * as globby from 'globby';
 
 /**
  * 将对象拍平
@@ -13,12 +15,12 @@ import * as path from 'path';
  * @param prefix
  */
 export function flatten(obj, prefix?) {
-  var propName = prefix ? prefix + '.' : '',
+  const propName = prefix ? prefix + '.' : '',
     ret = {};
 
-  for (var attr in obj) {
+  for (const attr in obj) {
     if (_.isArray(obj[attr])) {
-      var len = obj[attr].length;
+      const len = obj[attr].length;
       ret[attr] = obj[attr].join(',');
     } else if (typeof obj[attr] === 'object') {
       _.extend(ret, flatten(obj[attr], propName + attr));
@@ -102,7 +104,7 @@ export function getLangJson(fileName) {
  */
 export const getConfiguration = text => {
   let value = vscode.workspace.getConfiguration('better-i18n-linter').get(text) as string;
-  let kiwiConfigJson = getConfigFile();
+  const kiwiConfigJson = getConfigFile();
   if (!kiwiConfigJson) {
     return value;
   }
@@ -133,7 +135,7 @@ export const getConfigFile = () => {
  * 查找kiwi-linter配置文件
  */
 export const getKiwiLinterConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
+  const kiwiConfigJson = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
     return null;
@@ -246,12 +248,12 @@ export function getTargetLangPath(currentFilePath): string | string[] {
 }
 
 /**
- * 获取当前文件对应的项目路径
+ * 获取当前文件对应的项目路径的 glob
  */
 export function getCurrentProjectLangPath() {
   const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path);
   if (Array.isArray(targetLangPath)) {
-    if(targetLangPath.length === 0) {
+    if (targetLangPath.length === 0) {
       return '';
     }
     if (targetLangPath.length === 1) {
@@ -265,10 +267,33 @@ export function getCurrentProjectLangPath() {
   return '';
 }
 
+export function getCurrentProjectLangPathList() {
+  const globExp = getCurrentProjectLangPath();
+  const paths = globby.sync(globExp);
+  return paths;
+}
+
 /**
  * 获取当前文件对应的语言路径
  */
 export function getLangPrefix() {
   const langPrefix = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path);
   return Array.isArray(langPrefix) ? langPrefix.pop() || '' : langPrefix;
+}
+
+export function createMd5(message: string): string {
+  const hash = crypto
+    .createHash('md5')
+    .update(message.trim())
+    .digest('hex')
+    .substr(8, 16);
+  return hash;
+}
+
+export function getActiveTextEditor(): vscode.TextEditor {
+  return vscode.window.activeTextEditor!;
+}
+
+export function getWorkspacePath(): string {
+  return vscode.workspace.workspaceFolders![0].uri.fsPath;
 }

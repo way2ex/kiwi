@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
-import { getLangPrefix } from './utils';
+import { getActiveTextEditor, getLangPrefix } from './utils';
 import { LANG_PREFIX } from './const';
 
 export function updateLangFiles(keyValue: string, text: string, validateDuplicate: boolean) {
@@ -95,4 +95,34 @@ export function addImportToMainLangFile(newFilename: string) {
   }
 
   fs.outputFileSync(`${langPrefix}index.ts`, mainContent);
+}
+
+/**
+ * 向文件中插入一个键值对，目前只考虑简单的情况，且只支持插入一级
+ * @param key 插入的键
+ * @param value 插入的值
+ * @param fileUri 文件地址
+ */
+export async function insertKeyValueToFile(key: string, value: string, targetFileName: string): Promise<boolean> {
+  const fileContent = fs.readFileSync(targetFileName, { encoding: 'utf8' });
+  const lines = fileContent.split('\n');
+  const realKey = /^[0-9]/.test(key) ? `'${key}'` : key;
+  const newLine = `    ${realKey}: '${value}',\n`;
+  const pattern = /export\s*default\s*\{/;
+
+  // const textDocument = vscode.workspace.textDocuments.find(document => document.fileName === targetFileName)!;
+  const exportDefaultLine = lines.findIndex(line => {
+    return pattern.test(line);
+  });
+  if (exportDefaultLine === -1) {
+    // Todo: 兼容更多格式的解析, 考虑操作 ast
+    vscode.window.showErrorMessage(`插入新的键值对失败，未能成功解析文件${targetFileName}`);
+    return false;
+  }
+  const position = new vscode.Position(exportDefaultLine + 1, 0);
+  const edit = new vscode.WorkspaceEdit();
+  edit.insert(vscode.Uri.file(targetFileName), position, newLine);
+  vscode.workspace.applyEdit(edit);
+  const document = await vscode.workspace.openTextDocument(targetFileName);
+  return document.save();
 }
