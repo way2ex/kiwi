@@ -1,6 +1,10 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
+    "env": {
+        "node": true,
+        "commonjs": true
+    },
     "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module"
@@ -22,11 +26,21 @@
         "no-throw-literal": "warn",
         "semi": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
-				"no-control-regex": "off"
+		"no-control-regex": "off"
     },
     "ignorePatterns": [
         "out",
         "dist",
         "**/*.d.ts"
+    ],
+    "overrides": [
+        {
+            "files": [
+                "webpack.config.js"
+            ],
+            "rules": {
+                "@typescript-eslint/no-var-requires": "off"
+            }
+        }
     ]
 }

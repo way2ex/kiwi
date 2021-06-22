@@ -70,7 +70,7 @@ function findTextInTs(code: string, fileName: string) {
       case ts.SyntaxKind.TemplateExpression: {
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
-        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
+        templateContent = templateContent.toString().replace(/\$\{[^}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
           const end = node.getEnd();
