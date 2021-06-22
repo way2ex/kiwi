@@ -1,6 +1,7 @@
 import * as babel from '@babel/core';
 import { DOUBLE_BYTE_REGEX } from './const';
 import * as ts from 'typescript';
+import { ASTElement } from 'vue-template-compiler';
 function transerI18n(code, filename, lang) {
   if (lang === 'ts') {
     return typescriptI18n(code, filename);
@@ -9,7 +10,7 @@ function transerI18n(code, filename, lang) {
   }
 }
 function typescriptI18n(code, fileName) {
-  let arr: string[] = [];
+  const arr: string[] = [];
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
   function visit(node: ts.Node) {
     switch (node.kind) {
@@ -28,15 +29,15 @@ function typescriptI18n(code, fileName) {
   return arr;
 }
 function javascriptI18n(code, filename) {
-  let arr: string[] = [];
-  let visitor = {
+  const arr: string[] = [];
+  const visitor = {
     StringLiteral(path) {
       if (path.node.value.match(DOUBLE_BYTE_REGEX)) {
         arr.push(path.node.value);
       }
     }
   };
-  let arrayPlugin = { visitor };
+  const arrayPlugin = { visitor };
   babel.transform(code.toString(), {
     filename,
     plugins: [arrayPlugin]
@@ -44,12 +45,29 @@ function javascriptI18n(code, filename) {
   return arr;
 }
 //必须将模板语法中的所有待翻译语句翻译完成才能进行ast的string解析
-function findVueText(ast) {
-  let arr: unknown[] = [];
-  const regex1 = /\`(.+?)\`/g;
+function findVueText(ast: ASTElement, code: string) {
+  const arr: unknown[] = [];
+  const regex1 = /`(.+?)`/g;
   function emun(ast) {
+    if (Array.isArray(ast.attrsList)) {
+      ast.attrsList.forEach(attr => {
+        const { value } = attr;
+        const attrStr = code.slice(attr.start, attr.end);
+        const start = attr.start + attrStr.indexOf(value);
+        const end = start + value.length;
+        if (DOUBLE_BYTE_REGEX.test(value)) {
+          arr.push({
+            text: value,
+            start,
+            end,
+            isAttr: true,
+            attrInfo: attr
+          });
+        }
+      });
+    }
     if (ast.expression) {
-      let text = ast.expression.match(regex1);
+      const text = ast.expression.match(regex1);
       if (text && text[0].match(DOUBLE_BYTE_REGEX)) {
         text.forEach(itemText => {
           itemText.match(DOUBLE_BYTE_REGEX) && arr.push({ text: itemText, start: ast.start, end: ast.end });

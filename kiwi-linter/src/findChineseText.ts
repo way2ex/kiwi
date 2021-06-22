@@ -89,7 +89,7 @@ function findTextInTs(code: string, fileName: string) {
       case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
-        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
+        templateContent = templateContent.toString().replace(/\$\{[^}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
           const end = node.getEnd();
@@ -177,7 +177,7 @@ function findTextInHtml(code) {
     const value = node.value;
     if (value && typeof value === 'string' && value.match(DOUBLE_BYTE_REGEX)) {
       const valueSpan = node.valueSpan || node.sourceSpan;
-      let {
+      const {
         start: { offset: startOffset },
         end: { offset: endOffset }
       } = valueSpan;
@@ -207,15 +207,15 @@ function findTextInHtml(code) {
       const chineseMatches = value.source.match(DOUBLE_BYTE_REGEX);
       chineseMatches.map(match => {
         const valueSpan = node.valueSpan || node.sourceSpan;
-        let {
+        const {
           start: { offset: startOffset },
           end: { offset: endOffset }
         } = valueSpan;
         const nodeValue = code.slice(startOffset, endOffset);
         const start = nodeValue.indexOf(match);
         const end = start + match.length;
-        let startPos = activeEditor.document.positionAt(startOffset + start);
-        let endPos = activeEditor.document.positionAt(startOffset + end);
+        const startPos = activeEditor.document.positionAt(startOffset + start);
+        const endPos = activeEditor.document.positionAt(startOffset + end);
         const { trimStart, trimEnd } = trimWhiteSpace(code, startPos, endPos);
         const range = new vscode.Range(trimStart, trimEnd);
         matches.push({
@@ -247,76 +247,84 @@ function findTextInHtml(code) {
  * @question $符敏感
  */
 function findTextInVue(code, fileName) {
-  let rexspace1 = new RegExp(/&ensp;/, 'g');
-  let rexspace2 = new RegExp(/&emsp;/, 'g');
-  let rexspace3 = new RegExp(/&nbsp;/, 'g');
+  const rexspace1 = new RegExp(/&ensp;/, 'g');
+  const rexspace2 = new RegExp(/&emsp;/, 'g');
+  const rexspace3 = new RegExp(/&nbsp;/, 'g');
   code = code
     .replace(rexspace1, 'ccsp&;')
     .replace(rexspace2, 'ecsp&;')
     .replace(rexspace3, 'ncsp&;');
-  let coverRex1 = new RegExp(/ccsp&;/, 'g');
-  let coverRex2 = new RegExp(/ecsp&;/, 'g');
-  let coverRex3 = new RegExp(/ncsp&;/, 'g');
+  const coverRex1 = new RegExp(/ccsp&;/, 'g');
+  const coverRex2 = new RegExp(/ecsp&;/, 'g');
+  const coverRex3 = new RegExp(/ncsp&;/, 'g');
   const activeTextEditor = vscode.window.activeTextEditor!;
   const matches: unknown[] = [];
-  var result;
+  let result;
   const { document } = activeTextEditor;
-  const vueObejct = compilerVue.compile(code.toString(), { outputSourceRange: true });
-  let vueAst = vueObejct.ast;
-  let expressTemp = findVueText(vueAst);
+  const vueObejct = compilerVue.compile(code.toString(), { outputSourceRange: true })!;
+  const vueAst = vueObejct.ast!;
+  const expressTemp = findVueText(vueAst, code);
   (expressTemp as any[]).forEach(item => {
     const nodeValue = code.slice(item.start, item.end);
-    let startPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + 1);
-    let endPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + (item.text.length - 1));
+    const startPos = document.positionAt(item.start + nodeValue.indexOf(item.text));
+    const endPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + item.text.length);
     const range = new vscode.Range(startPos, endPos);
+
     matches.push({
       arrf: [item.start, item.end],
       range,
       text: item.text.trimRight(),
-      isString: true
+      isString: true,
+      isInTemplate: true,
+      isAttr: item.isAttr,
+      attrInfo: item.attrInfo
     });
   });
-  let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
+  const outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
   let vueTemp: string[] = transerI18n(outcode, 'as.vue', null);
   /**删除所有的html中的头部空格 */
   vueTemp = vueTemp.map(item => {
     return item.trim();
   });
   vueTemp = [...new Set(vueTemp)];
-  vueTemp.forEach(item => {
-    let items = item
-      .replace(/\{/g, '\\{')
-      .replace(/\}/g, '\\}')
-      .replace(/\$/g, '\\$')
-      .replace(/\(/g, '\\(')
-      .replace(/\)/g, '\\)')
-      .replace(/\+/g, '\\+')
-      .replace(/\*/g, '\\*')
-      .replace(/\^/g, '\\^');
-    let rex = new RegExp(items, 'g');
-    while ((result = rex.exec(code))) {
-      let res = result;
-      let last = rex.lastIndex;
-      last = last - (res[0].length - res[0].trimRight().length);
-      const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
-      matches.push({
-        arrf: [res.index, last],
-        range,
-        text: res[0]
-          .trimRight()
-          .replace(coverRex1, '&ensp;')
-          .replace(coverRex2, '&emsp;')
-          .replace(coverRex3, '&nbsp;'),
-        isString:
-          (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
-          (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")
-            ? true
-            : false
-      });
-    }
-  });
-  let matchesTemp: any[] = matches;
-  let matchesTempResult = matchesTemp.filter((item, index) => {
+  vueTemp
+    .filter(item => {
+      return !matches.find((m: any) => m.text === item);
+    })
+    .forEach(item => {
+      const items = item
+        .replace(/\{/g, '\\{')
+        .replace(/\}/g, '\\}')
+        .replace(/\$/g, '\\$')
+        .replace(/\(/g, '\\(')
+        .replace(/\)/g, '\\)')
+        .replace(/\+/g, '\\+')
+        .replace(/\*/g, '\\*')
+        .replace(/\^/g, '\\^');
+      const rex = new RegExp(items, 'g');
+      while ((result = rex.exec(code))) {
+        const res = result;
+        let last = rex.lastIndex;
+        last = last - (res[0].length - res[0].trimRight().length);
+        const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
+        matches.push({
+          arrf: [res.index, last],
+          range,
+          text: res[0]
+            .trimRight()
+            .replace(coverRex1, '&ensp;')
+            .replace(coverRex2, '&emsp;')
+            .replace(coverRex3, '&nbsp;'),
+          isString:
+            (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
+            (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")
+              ? true
+              : false
+        });
+      }
+    });
+  const matchesTemp: any[] = matches;
+  const matchesTempResult = matchesTemp.filter((item, index) => {
     let canBe = true;
     matchesTemp.forEach(items => {
       if (
@@ -327,7 +335,9 @@ function findTextInVue(code, fileName) {
         canBe = false;
       }
     });
-    if (canBe) {return item;}
+    if (canBe) {
+      return item;
+    }
   });
   const sfc: compilerVue.SFCDescriptor = compilerVue.parseComponent(code.toString());
   return matchesTempResult.concat(findTextInVueTs(sfc.script!.content, fileName, sfc.script!.start!));

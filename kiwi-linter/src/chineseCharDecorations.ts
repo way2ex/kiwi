@@ -22,7 +22,7 @@ function getChineseCharDecoration() {
     overviewRulerColor: hasOverviewRuler ? color : undefined,
     overviewRulerLane: hasOverviewRuler ? vscode.OverviewRulerLane.Right : undefined,
     light: {
-      borderColor: shouldMark ? color: undefined
+      borderColor: shouldMark ? color : undefined
     },
     dark: {
       borderColor: shouldMark ? color : undefined
@@ -84,7 +84,7 @@ export function updateDecorations() {
   const text = activeEditor.document.getText();
   // 清空上一次的保存结果
   let targetStrs: any[] = [];
-  let chineseChars: vscode.DecorationOptions[] = [];
+  const chineseChars: vscode.DecorationOptions[] = [];
 
   targetStrs = findChineseText(text, currentFilename);
   targetStrs.map(match => {

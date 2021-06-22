@@ -37,6 +37,15 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
         finalReplaceVal = '{{' + val + '}}';
       } else if (isVueFile) {
         finalReplaceVal = '{{' + val + '}}';
+        const { isAttr = false, attrInfo } = arg as any;
+        if (isAttr) {
+          const { start, end, name, value } = attrInfo;
+          const attrStrRange = new vscode.Range(document.positionAt(start), document.positionAt(end));
+          const attrStr = document.getText(attrStrRange);
+          const newAttrString = attrStr.replace(name, `:${name}`).replace(value, `${val}`);
+          edit.replace(document.uri, attrStrRange, newAttrString);
+          return vscode.workspace.applyEdit(edit);
+        }
       } else {
         finalReplaceVal = '{' + val + '}';
       }
@@ -115,6 +124,22 @@ export function replaceTargetString(arg: TargetStr, val: string): Thenable<boole
         finalReplaceVal = '{{' + val + '}}';
       } else if (isVueFile) {
         finalReplaceVal = '{{' + val + '}}';
+        const { isAttr = false, attrInfo } = arg as any;
+        if (isAttr) {
+          const { start, end, name, value } = attrInfo;
+          const attrStrRange = new vscode.Range(document.positionAt(start), document.positionAt(end));
+          const attrStr = document.getText(attrStrRange);
+          const newAttrString = attrStr.replace(name, `:${name}`).replace(value, `${val}`);
+          edit.replace(
+            document.uri,
+            arg.range.with({
+              start: arg.range.start.translate(0, -1),
+              end: arg.range.end.translate(0, 1)
+            }),
+            newAttrString
+          );
+          return vscode.workspace.applyEdit(edit);
+        }
       } else {
         finalReplaceVal = '{' + val + '}';
       }
