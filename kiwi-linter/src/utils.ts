@@ -8,6 +8,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as globby from 'globby';
+import { DOUBLE_BYTE_REGEX } from './const';
 
 /**
  * 将对象拍平
