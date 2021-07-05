@@ -297,3 +297,51 @@ export function getActiveTextEditor(): vscode.TextEditor {
 export function getWorkspacePath(): string {
   return vscode.workspace.workspaceFolders![0].uri.fsPath;
 }
+
+export function getI18NExp(key: string): string {
+  if (/^[0-9]/.test(key)) {
+    return `I18N['${key}']`;
+  }
+  return `I18N.${key}`;
+}
+
+export function getRangeByOffset(start: number, end: number): vscode.Range {
+  const { document } = getActiveTextEditor();
+  return new vscode.Range(document.positionAt(start), document.positionAt(end));
+}
+
+interface IProjectConfig {
+  target: string;
+  kiwiDir: string[];
+  importStatement?: string;
+}
+export interface IKiwiConfig {
+  projects: IProjectConfig[];
+  importStatement?: string;
+}
+/**
+ * 获取 .kiwi 配置文件中的配置
+ * @param key 要获取的key
+ * @returns 对应的配置
+ */
+export function getKiwiConfig(key?: string | undefined): IKiwiConfig | undefined {
+  const file = getKiwiLinterConfigFile();
+  if (!file) {
+    return undefined;
+  }
+  try {
+    const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (key) {
+      return _.get(config, key);
+    } else {
+      return config;
+    }
+  } catch (e) {
+    console.error(e);
+    return undefined;
+  }
+}
+
+export function getEndOfLine(eol: vscode.EndOfLine): string {
+  return eol === vscode.EndOfLine.LF ? '\n' : '\r\n';
+}

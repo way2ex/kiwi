@@ -12,27 +12,29 @@ import { DIR_ADAPTOR } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { createMd5, findMatchKey, getCurrentProjectLangPathList, getWorkspacePath } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
-import { TargetStr } from './define';
 import { replaceAndUpdate, replaceTargetString } from './replaceAndUpdate';
 import { getConfiguration, getConfigFile, translateText, getKiwiLinterConfigFile } from './utils';
 import { insertKeyValueToFile } from './file';
+import { TargetString } from './search-text/types';
+import { ExtractI18nArgs, EXTRACT_I18N } from './const/commonds';
+
 /**
  * 主入口文件
  * @param context
  */
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
   if (!getKiwiLinterConfigFile() && !getConfigFile() && !fs.existsSync(DIR_ADAPTOR)) {
     /** 存在配置文件则开启 */
     return;
   }
   console.log('Congratulations, your extension "kiwi-linter" is now active!');
   context.subscriptions.push(vscode.commands.registerCommand('better-i18n-linter.findAllI18N', findAllI18N));
-  let targetStrs: TargetStr[] = [];
+  let targetStrs: TargetString[] = [];
   let finalLangObj: Record<string, string> = {};
 
   let activeEditor = vscode.window.activeTextEditor!;
   if (activeEditor) {
-    triggerUpdateDecorations((newTargetStrs: TargetStr[]) => {
+    triggerUpdateDecorations((newTargetStrs: TargetString[]) => {
       targetStrs = newTargetStrs;
     });
   }
@@ -74,56 +76,52 @@ export function activate(context: vscode.ExtensionContext) {
           { scheme: '*', language: 'vue' }
         ],
         {
-          provideCodeActions: function(document, range, context, token) {
-            const targetStr = targetStrs.find(t => range.intersection(t.range) !== undefined);
-            if (targetStr) {
-              const sameTextStrs = targetStrs.filter(t => t.text === targetStr.text);
-              const text = targetStr.text;
-              const actions: unknown[] = [];
-              finalLangObj = getSuggestLangObj();
-              for (const key of Object.keys(finalLangObj)) {
-                if (finalLangObj[key] === text) {
-                  actions.push({
-                    title: `抽取为 \`I18N['${key}']\``,
-                    command: 'better-i18n-linter.extractI18N',
+          provideCodeActions(document, range) {
+            const targetStr = targetStrs.find(
+              t =>
+                range.intersection(new vscode.Range(document.positionAt(t.start), document.positionAt(t.end))) !==
+                undefined
+            );
+            if (!targetStr) {
+              return [];
+            }
+            const sameTextStrs = targetStrs.filter(t => t.content === targetStr.content);
+            const text = targetStr.content;
+            const actions: vscode.CodeAction[] = [];
+            finalLangObj = getSuggestLangObj();
+            for (const key of Object.keys(finalLangObj)) {
+              if (finalLangObj[key] === text) {
+                actions.push({
+                  title: `抽取为 \`I18N['${key}']\``,
+                  command: {
+                    ...EXTRACT_I18N,
                     arguments: [
                       {
                         targets: sameTextStrs,
-                        varName: `I18N['${key}']`
+                        key,
+                        value: text
                       }
                     ]
-                  });
-                }
+                  }
+                });
               }
-              if (!actions.length) {
-                const hashKey = createMd5(text);
-                actions.push({
-                  title: `抽取并自动生成key: \`I18N['${hashKey}']\``,
-                  command: 'better-i18n-linter.extractI18N',
+            }
+            if (!actions.length) {
+              actions.push({
+                title: '抽取并自动生成key',
+                command: {
+                  ...EXTRACT_I18N,
                   arguments: [
                     {
                       targets: sameTextStrs,
-                      varName: `I18N['${hashKey}']`,
-                      appendToFile: true,
-                      key: hashKey,
-                      value: targetStr.text
-                    }
-                  ]
-                });
-              }
-              return [
-                ...actions,
-                {
-                  title: `抽取为自定义 I18N 变量（共${sameTextStrs.length}处）`,
-                  command: 'better-i18n-linter.extractI18N',
-                  arguments: [
-                    {
-                      targets: sameTextStrs
+                      value: text,
+                      autoGenerateKey: true
                     }
                   ]
                 }
-              ] as any;
+              });
             }
+            return actions;
           }
         }
       )
@@ -132,78 +130,36 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 点击小灯泡后进行替换操作
   context.subscriptions.push(
-    vscode.commands.registerCommand('better-i18n-linter.extractI18N', args => {
-      return new Promise<string>(resolve => {
-        const { key, value, varName, targets } = args;
-        // 若变量名已确定则直接开始替换
-        if (args.varName) {
-          if (!args.appendToFile) {
-            return resolve(args.varName);
-          }
-          const langPaths = getCurrentProjectLangPathList();
-          const workspacePath = getWorkspacePath();
-          vscode.window
-            .showQuickPick(
-              langPaths.map(fullPath => {
-                if (fullPath.includes(workspacePath)) {
-                  return fullPath.replace(workspacePath, '');
-                }
-                return fullPath;
-              })
-            )
-            .then(fileName => {
-              insertKeyValueToFile(key, value, workspacePath + fileName!).then(res => {
-                if (res) {
-                  targets
-                    .reduce((pre, cur) => {
-                      return pre.then(() => {
-                        return replaceTargetString(cur, varName);
-                      });
-                    }, Promise.resolve())
-                    .then(() => {
-                      vscode.window.showInformationMessage(`成功增加 key 并替换${targets.length}处文案`);
-                    });
-                }
-              });
-              return false;
-            });
-          return false;
-        }
-        // 否则要求用户输入变量名
-        return resolve(
-          vscode.window.showInputBox({
-            prompt: '请输入变量名，格式 `I18N.[page].[key]`，按 <回车> 启动替换',
-            value: `I18N.${suggestion.length ? suggestion.join('.') + '.' : ''}`,
-            validateInput(input) {
-              if (!input.match(/^I18N\.\w+\.\w+/)) {
-                return '变量名格式 `I18N.[page].[key]`，如 `I18N.dim.new`，[key] 中可包含更多 `.`';
+    vscode.commands.registerCommand(EXTRACT_I18N.command, async (args: ExtractI18nArgs) => {
+      const { key, value, targets, autoGenerateKey } = args;
+      if (key) {
+        await replaceTargetString(targets, key);
+        vscode.window.showInformationMessage(`成功替换${targets.length}处文案`);
+        return;
+      }
+      if (autoGenerateKey) {
+        const hashKey = createMd5(value);
+        const langPaths = getCurrentProjectLangPathList();
+        const workspacePath = getWorkspacePath();
+        const fileName = await vscode.window
+          .showQuickPick(
+            langPaths.map(fullPath => {
+              if (fullPath.includes(workspacePath)) {
+                return fullPath.replace(workspacePath, '');
               }
-            }
-          })
-        );
-      }).then((val: string) => {
-        // 没有输入变量名
-        if (!val) {
+              return fullPath;
+            })
+          )
+          .then(res => res);
+        if (!fileName) {
           return;
         }
-        const finalArgs = Array.isArray(args.targets) ? args.targets : [args.targets];
-        return finalArgs
-          .reverse()
-          .reduce((prev: Promise<any>, curr: TargetStr, index: number) => {
-            return prev.then(() => {
-              const isEditCommon = val.startsWith('I18N.common.');
-              return replaceAndUpdate(curr, val, !isEditCommon && index === 0 ? !args.varName : false);
-            });
-          }, Promise.resolve())
-          .then(
-            () => {
-              vscode.window.showInformationMessage(`成功替换 ${finalArgs.length} 处文案`);
-            },
-            err => {
-              console.log(err, 'err');
-            }
-          );
-      });
+        await insertKeyValueToFile(hashKey, targets[0]!, workspacePath + fileName!);
+        await replaceTargetString(targets, hashKey);
+        vscode.window.showInformationMessage(`成功增加 key 并替换${targets.length}处文案`);
+        return;
+      }
+      // todo: 自定义输入key
     })
   );
 
@@ -217,7 +173,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const replaceableStrs: any[] = targetStrs.reduce<any>((prev, curr) => {
-        const key = findMatchKey(finalLangObj, curr.text);
+        const key = findMatchKey(finalLangObj, curr.content);
         if (key && key.startsWith('common.')) {
           return prev.concat({
             target: curr,
@@ -275,17 +231,17 @@ export function activate(context: vscode.ExtensionContext) {
             const translatePromises = targetStrs.reduce((prev, curr) => {
               // 避免翻译的字符里包含数字或者特殊字符等情况
               const reg = /[^a-zA-Z\x00-\xff]+/g;
-              const findText = curr.text.match(reg);
+              const findText = curr.content.match(reg);
               const transText = findText!.join('').slice(0, 4);
               return prev.concat(translateText(transText));
             }, []);
 
             Promise.all(translatePromises).then(([...translateTexts]) => {
               const replaceableStrs: any[] = targetStrs.reduce<any>((prev, curr, i) => {
-                const key = findMatchKey(finalLangObj, curr.text);
-                if (!virtualMemory[curr.text]) {
+                const key = findMatchKey(finalLangObj, curr.content);
+                if (!virtualMemory[curr.content]) {
                   if (key) {
-                    virtualMemory[curr.text] = key;
+                    virtualMemory[curr.content] = key;
                     return prev.concat({
                       target: curr,
                       key
@@ -300,7 +256,7 @@ export function activate(context: vscode.ExtensionContext) {
                   let occurTime = 1;
                   // 防止出现前四位相同但是整体文案不同的情况
                   while (
-                    finalLangObj[transKey] !== curr.text &&
+                    finalLangObj[transKey] !== curr.content &&
                     _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
                   ) {
                     occurTime++;
@@ -308,8 +264,8 @@ export function activate(context: vscode.ExtensionContext) {
                   if (occurTime >= 2) {
                     transKey = `${transKey}${occurTime}`;
                   }
-                  virtualMemory[curr.text] = transKey;
-                  finalLangObj[transKey] = curr.text;
+                  virtualMemory[curr.content] = transKey;
+                  finalLangObj[transKey] = curr.content;
                   return prev.concat({
                     target: curr,
                     key: transKey
@@ -317,7 +273,7 @@ export function activate(context: vscode.ExtensionContext) {
                 } else {
                   return prev.concat({
                     target: curr,
-                    key: virtualMemory[curr.text]
+                    key: virtualMemory[curr.content]
                   });
                 }
               }, []);

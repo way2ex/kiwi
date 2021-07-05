@@ -9,6 +9,8 @@ import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
 import { getActiveTextEditor, getLangPrefix } from './utils';
 import { LANG_PREFIX } from './const';
+import { TargetString, TargetTypes } from './search-text/types';
+import { formatTemplateString } from './pure-utils';
 
 export function updateLangFiles(keyValue: string, text: string, validateDuplicate: boolean) {
   if (!keyValue.startsWith('I18N.')) {
@@ -72,7 +74,7 @@ export function addImportToMainLangFile(newFilename: string) {
     mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
 
     if (/\n(}\);)/.test(mainContent)) {
-      if (/\,\n(}\);)/.test(mainContent)) {
+      if (/,\n(}\);)/.test(mainContent)) {
         /** 最后一行包含,号 */
         mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
       } else {
@@ -82,7 +84,7 @@ export function addImportToMainLangFile(newFilename: string) {
     }
 
     if (/\n(};)/.test(mainContent)) {
-      if (/\,\n(};)/.test(mainContent)) {
+      if (/,\n(};)/.test(mainContent)) {
         /** 最后一行包含,号 */
         mainContent = mainContent.replace(/(};)/, `  ${newFilename},\n$1`);
       } else {
@@ -103,14 +105,22 @@ export function addImportToMainLangFile(newFilename: string) {
  * @param value 插入的值
  * @param fileUri 文件地址
  */
-export async function insertKeyValueToFile(key: string, value: string, targetFileName: string): Promise<boolean> {
+export async function insertKeyValueToFile(
+  key: string,
+  target: TargetString,
+  targetFileName: string
+): Promise<boolean> {
   const fileContent = fs.readFileSync(targetFileName, { encoding: 'utf8' });
   const lines = fileContent.split('\n');
   const realKey = /^[0-9]/.test(key) ? `'${key}'` : key;
+  let value = target.content;
+  if (target.type === TargetTypes.TEMPLATE_EXPRESSION && target.expressions.length) {
+    // todo: 这里只适用于简单情况
+    value = formatTemplateString(value);
+  }
   const newLine = `    ${realKey}: '${value}',\n`;
   const pattern = /export\s*default\s*\{/;
 
-  // const textDocument = vscode.workspace.textDocuments.find(document => document.fileName === targetFileName)!;
   const exportDefaultLine = lines.findIndex(line => {
     return pattern.test(line);
   });

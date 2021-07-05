@@ -4,9 +4,10 @@
  */
 import * as vscode from 'vscode';
 import { setLineDecorations } from './lineAnnotation';
-import { findChineseText } from './findChineseText';
 import * as minimatch from 'minimatch';
 import { getConfiguration } from './utils';
+import { searchChinese } from './search-text';
+import { TargetString } from './search-text/types';
 
 /**
  * 中文的标记，红框样式
@@ -45,9 +46,13 @@ export function triggerUpdateDecorations(callback?) {
     if (!matchPattern()) {
       return;
     }
-    const { targetStrs, chineseCharDecoration } = updateDecorations()!;
-    prevChineseCharDecoration = chineseCharDecoration;
-    callback(targetStrs);
+    try {
+      const { targetStrs, chineseCharDecoration } = updateDecorations()!;
+      prevChineseCharDecoration = chineseCharDecoration;
+      callback(targetStrs);
+    } catch (e) {
+      vscode.window.showErrorMessage(e);
+    }
   }, 500);
 }
 
@@ -83,14 +88,18 @@ export function updateDecorations() {
 
   const text = activeEditor.document.getText();
   // 清空上一次的保存结果
-  let targetStrs: any[] = [];
+  let targetStrs: TargetString[] = [];
   const chineseChars: vscode.DecorationOptions[] = [];
 
-  targetStrs = findChineseText(text, currentFilename);
+  targetStrs = searchChinese(text, currentFilename);
+  console.log('targetStrs: ', targetStrs);
   targetStrs.map(match => {
     const decoration = {
-      range: match.range,
-      hoverMessage: `🐤 检测到中文文案🇨🇳 ： ${match.text}`
+      range: new vscode.Range(
+        activeEditor.document.positionAt(match.start),
+        activeEditor.document.positionAt(match.end)
+      ),
+      hoverMessage: `🐤 检测到中文文案🇨🇳 ： ${match.content}`
     };
     chineseChars.push(decoration);
   });
