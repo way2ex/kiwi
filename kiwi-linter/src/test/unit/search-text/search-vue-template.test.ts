@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { searchVue } from '../../search-text/search-vue-sfc';
+import { searchVue } from '../../../search-text/search-vue-sfc';
 
 describe('Search Vue Template Test', () => {
   it('simple props', () => {

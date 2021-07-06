@@ -1,4 +1,4 @@
-import { searchJs } from '../../search-text/search-js';
+import { searchJs } from '../../../search-text/search-js';
 import { expect } from 'chai';
 
 describe('Search Javascript Test', () => {

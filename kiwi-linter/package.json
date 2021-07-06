@@ -110,7 +110,9 @@
 		"pretest": "yarn run test-compile",
 		"lint": "eslint src --ext ts",
 		"test": "node ./dist/test/runTest.js",
-		"test-unit": "yarn pretest && mocha */unit-test/**/*.test.js"
+        "test:unit": "yarn coverage",
+		"test:unit:direct": "yarn pretest && mocha ./dist/test/unit",
+        "coverage": "nyc yarn test:unit:direct"
 	},
 	"devDependencies": {
 		"@types/chai": "^4.2.19",
@@ -132,6 +134,8 @@
 		"glob": "^7.1.7",
 		"husky": "^6.0.0",
 		"mocha": "^8.4.0",
+		"mochawesome": "^6.2.2",
+		"nyc": "^15.1.0",
 		"ts-loader": "8.x",
 		"typescript": "^4.3.2",
 		"vscode-test": "^1.5.2",

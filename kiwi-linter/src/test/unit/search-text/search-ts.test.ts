@@ -1,8 +1,8 @@
-import { searchJs } from '../../search-text/search-js';
+import { searchJs } from '../../../search-text/search-js';
 import { expect } from 'chai';
 
 describe('Search Typescript Test', () => {
-  it.only('simple typescript code', () => {
+  it('simple typescript code', () => {
     const code = "const a: string = `这里有${ num + '个' }个中国人`";
     const result = searchJs(code);
     expect(result).to.deep.equal([
