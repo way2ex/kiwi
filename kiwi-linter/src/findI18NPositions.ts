@@ -77,7 +77,6 @@ export function findI18NPositions(code: string): Position[] {
 
   const regexMatches = getRegexMatches(I18N, code);
   let matchPositions = positions.concat(regexMatches);
-  console.log('匹配到I18N的位置: ', matchPositions);
   matchPositions = _.uniqBy<Position>(matchPositions, (position: Position) => {
     return `${position.code}-${position.line}`;
   });

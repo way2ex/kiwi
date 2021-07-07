@@ -8,7 +8,7 @@ import * as path from 'path';
 import { getI18N } from './getLangData';
 import { Item } from './define';
 import { LANG_PREFIX } from './const';
-import { findPositionInCode, getTargetLangPath } from './utils';
+import { findPositionInCode, getI18NExp, getTargetLangPath } from './utils';
 import { findInHtmls } from './findInHtmls';
 import { findI18NPositions } from './findI18NPositions';
 import { transformPosition } from './lineAnnotation';
@@ -52,8 +52,8 @@ export function findAllI18N(): void {
     }
 
     const [target, ...restKeys] = foundItem.keys;
-    const uri = vscode.Uri.file(path.join(langPrefix, target + '.ts'));
-    const content = (await fs.readFile(path.join(langPrefix, target + '.ts'))).toString('utf8');
+    const uri = vscode.Uri.file(path.join(langPrefix as string, target + '.ts'));
+    const content = (await fs.readFile(path.join(langPrefix as string, target + '.ts'))).toString('utf8');
 
     const preCodeContent = '"' + restKeys[restKeys.length - 1] + '"';
     const newCodeContent = ' ' + restKeys[restKeys.length - 1] + ':';
@@ -123,5 +123,23 @@ export function findI18N(): void {
     const range = transformPosition(foundPos, code);
     vscode.window.activeTextEditor!.selection = new vscode.Selection(range.start, range.end);
     vscode.window.activeTextEditor!.revealRange(range, vscode.TextEditorRevealType.InCenter);
+  });
+}
+
+/**
+ * 全局查找用到的文案
+ */
+export async function searchI18NInAllFiles(): Promise<void> {
+  const allItems = Object.entries(getI18N()).map(([k, v]) => `${v}: ${k}`);
+  const item = await vscode.window.showQuickPick(allItems).then(
+    res => res,
+    () => undefined
+  );
+  if (!item) {
+    return;
+  }
+  const key = item.split(': ')[1];
+  vscode.commands.executeCommand('workbench.action.findInFiles', {
+    query: key
   });
 }

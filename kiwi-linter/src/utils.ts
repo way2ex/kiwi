@@ -8,22 +8,24 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as globby from 'globby';
-
+import * as GoogleTranslate from 'google-translate';
+interface NestedObj {
+  [key: string]: NestedObj | string | string[];
+}
 /**
  * 将对象拍平
  * @param obj    原始对象
  * @param prefix
  */
-export function flatten(obj, prefix?) {
+export function flatten(obj: NestedObj, prefix?: string): Record<string, string> {
   const propName = prefix ? prefix + '.' : '',
     ret = {};
 
   for (const attr in obj) {
-    if (_.isArray(obj[attr])) {
-      const len = obj[attr].length;
-      ret[attr] = obj[attr].join(',');
+    if (Array.isArray(obj[attr])) {
+      ret[attr] = (obj[attr] as string[]).join(',');
     } else if (typeof obj[attr] === 'object') {
-      _.extend(ret, flatten(obj[attr], propName + attr));
+      _.extend(ret, flatten(obj[attr] as NestedObj, propName + attr));
     } else {
       ret[propName + attr] = obj[attr];
     }
@@ -51,7 +53,7 @@ export function findPositionInCode(text: string, code: string): null | vscode.Po
   return new vscode.Position(lineNum, chNum);
 }
 
-export function findMatchKey(langObj, text) {
+export function findMatchKey(langObj: Record<string, string>, text: string): null | string {
   for (const key in langObj) {
     if (langObj[key] === text) {
       return key;
@@ -67,7 +69,7 @@ export function findMatchKey(langObj, text) {
  * @param  {string} dir Dir path string.
  * @return {string[]} Array with all file names that are inside the directory.
  */
-export const getAllFiles = dir =>
+export const getAllFiles = (dir: string): string[] =>
   fs.readdirSync(dir).reduce<string[]>((files, file) => {
     // 避免读取node_modules造成性能问题
     if (file === 'node_modules') {
@@ -81,7 +83,7 @@ export const getAllFiles = dir =>
 /**
  * 获取文件 Json
  */
-export function getLangJson(fileName) {
+export function getLangJson(fileName: string): Record<string, string> {
   const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
   const matchRes = fileContent.match(/export\s*default\s*({[\s\S]+);?$/);
   if (!matchRes || !matchRes[1]) {
@@ -102,7 +104,7 @@ export function getLangJson(fileName) {
 /**
  * 获取配置，支持从vscode和配置文件(优先)中取到配置项
  */
-export const getConfiguration = text => {
+export const getConfiguration = (text: string): string => {
   let value = vscode.workspace.getConfiguration('better-i18n-linter').get(text) as string;
   const kiwiConfigJson = getConfigFile();
   if (!kiwiConfigJson) {
@@ -118,7 +120,7 @@ export const getConfiguration = text => {
 /**
  * 查找kiwi-cli配置文件
  */
-export const getConfigFile = () => {
+export const getConfigFile = (): string | null => {
   let kiwiConfigJson = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwirc.js`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
@@ -134,7 +136,7 @@ export const getConfigFile = () => {
 /**
  * 查找kiwi-linter配置文件
  */
-export const getKiwiLinterConfigFile = () => {
+export const getKiwiLinterConfigFile = (): null | string => {
   const kiwiConfigJson = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
@@ -194,9 +196,9 @@ function withTimeout(promise, ms) {
 /**
  * 翻译中文
  */
-export function translateText(text) {
+export function translateText(text: string): string {
   const googleApiKey = getGoogleApiKey();
-  const { translate: googleTranslate } = require('google-translate')(googleApiKey);
+  const { translate: googleTranslate } = GoogleTranslate(googleApiKey);
 
   function _translateText() {
     return withTimeout(
@@ -219,7 +221,7 @@ export function translateText(text) {
 /**
  * 获取多项目配置
  */
-export function getTargetLangPath(currentFilePath): string | string[] {
+export function getTargetLangPath(currentFilePath: string): string | string[] {
   const configFile = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
   let targetLangPath = '';
 
@@ -250,7 +252,10 @@ export function getTargetLangPath(currentFilePath): string | string[] {
 /**
  * 获取当前文件对应的项目路径的 glob
  */
-export function getCurrentProjectLangPath() {
+export function getCurrentProjectLangPath(): string {
+  if (!vscode.window.activeTextEditor) {
+    return '';
+  }
   const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path);
   if (Array.isArray(targetLangPath)) {
     if (targetLangPath.length === 0) {
@@ -267,7 +272,7 @@ export function getCurrentProjectLangPath() {
   return '';
 }
 
-export function getCurrentProjectLangPathList() {
+export function getCurrentProjectLangPathList(): string[] {
   const globExp = getCurrentProjectLangPath();
   const paths = globby.sync(globExp);
   return paths;
@@ -276,7 +281,7 @@ export function getCurrentProjectLangPathList() {
 /**
  * 获取当前文件对应的语言路径
  */
-export function getLangPrefix() {
+export function getLangPrefix(): string {
   const langPrefix = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path);
   return Array.isArray(langPrefix) ? langPrefix.pop() || '' : langPrefix;
 }

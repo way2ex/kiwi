@@ -92,7 +92,6 @@ export function updateDecorations() {
   const chineseChars: vscode.DecorationOptions[] = [];
 
   targetStrs = searchChinese(text, currentFilename);
-  console.log('targetStrs: ', targetStrs);
   targetStrs.map(match => {
     const decoration = {
       range: new vscode.Range(

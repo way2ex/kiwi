@@ -10,7 +10,7 @@ import { I18N_GLOB } from './const';
 /**
  * 获取对应文件的语言
  */
-export function getLangData(fileName: string) {
+export function getLangData(fileName: string): Record<string, unknown> {
   if (fs.existsSync(fileName)) {
     return getLangJson(fileName);
   } else {
@@ -22,7 +22,7 @@ export function getLangData(fileName: string) {
  * 获取项目配置的所有的中文文案
  * @returns {Object} 包含所有中文文案的对象
  */
-export function getI18N() {
+export function getI18N(): Record<string, string> {
   const _I18N_GLOB = getCurrentProjectLangPath() || I18N_GLOB;
   const paths = globby.sync(_I18N_GLOB);
   let langObj = {};
@@ -41,6 +41,6 @@ export function getI18N() {
  */
 export function getSuggestLangObj(): Record<string, string> {
   const langObj = getI18N();
-  const finalLangObj = flatten(langObj) as any;
+  const finalLangObj = flatten(langObj) as Record<string, string>;
   return finalLangObj;
 }
