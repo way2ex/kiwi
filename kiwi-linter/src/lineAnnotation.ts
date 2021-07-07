@@ -66,24 +66,25 @@ export function transformPosition(pos: Position, editorText: string, toLastCol?:
 export function setLineDecorations(activeEditor) {
   const code = activeEditor.document.getText();
   const positions = findI18NPositions(code);
-  console.log('positions', positions);
   let decorations: DecorationOptions[] = [];
-  decorations = (positions || []).filter(pos => pos.cn.length).map(pos => {
-    const toLastCol = true;
-    const range = transformPosition(pos, code, toLastCol);
-    return {
-      range,
-      renderOptions: {
-        after: {
-          color: '#999999',
-          contentText: `🇨🇳 ${pos.cn.map(exp => exp.replace('\n', '\\n')).join(' | ')} 🐤`,
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          textDecoration: 'none;'
-        }
-      } as DecorationInstanceRenderOptions
-    } as DecorationOptions;
-  });
+  decorations = (positions || [])
+    .filter(pos => pos.cn.length)
+    .map(pos => {
+      const toLastCol = true;
+      const range = transformPosition(pos, code, toLastCol);
+      return {
+        range,
+        renderOptions: {
+          after: {
+            color: '#999999',
+            contentText: `🇨🇳 ${pos.cn.map(exp => exp.replace('\n', '\\n')).join(' | ')} 🐤`,
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textDecoration: 'none;'
+          }
+        } as DecorationInstanceRenderOptions
+      } as DecorationOptions;
+    });
 
   activeEditor.setDecorations(annotationDecoration, decorations);
 }

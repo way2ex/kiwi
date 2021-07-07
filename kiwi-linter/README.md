@@ -65,6 +65,7 @@ default: `true`
 支持多个文件夹使用各自不同的语言包配置，只需在项目根目录下创建 `.kiwi` 文件，写入配置即可：
 ```json
 {
+    "importStatement": "import { I18N } from '@/common/i18n';",
     "projects": [
         {
             "target": "packages/package-a",
@@ -76,8 +77,10 @@ default: `true`
     ]
 }
 ```
+- `importStatement`: string, 当在没有导入过 `I18N` 的文件中自动提取中文时，会自动插入导入的语句。
 - `projects.target`: string, 目标文件所在的目录前缀，内部使用 `fileUri.indexOf(target)` 的方式判断是否应用该工程配置；
 - `projects.kiwiDir`: string | string[], 中文包所在的目标目录，可以配置一个或多个；
+- `projects.importStatement`: string, 本工程对应的自动导入的语句；
 
 > 配置中的所有路径均为相对于工程的相对路径。
 

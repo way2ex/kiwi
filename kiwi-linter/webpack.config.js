@@ -1,7 +1,7 @@
 //@ts-check
 
 'use strict';
-
+const webpack = require('webpack');
 const path = require('path');
 
 /**@type {import('webpack').Configuration}*/
@@ -23,8 +23,11 @@ const config = {
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.js'],
-    modules: ['node_modules']
+    extensions: ['.ts', '.js', '.json'],
+    modules: ['node_modules'],
+    alias: {
+      '@vue/compiler-dom': '@vue/compiler-dom/dist/compiler-dom.cjs'
+    }
   },
   module: {
     rules: [
@@ -38,6 +41,11 @@ const config = {
         ]
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^(atpl|bracket-template|coffee-script|dot|dustjs-linkedin|eco|ect|ejs|haml-coffee|hamlet|hamljs|hogan.js|htmling|jazz|jqtpl|just|liquor|marko|mote|mustache|plates|ractive|slm|squirrelly|teacup\/lib\/express|templayed|toffee|twig|twing|vash|velocityjs|walrus|whiskers)$/
+    })
+  ]
 };
 module.exports = config;

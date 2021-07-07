@@ -37,7 +37,7 @@ function extractObject(obj, keys = [] as string[]): Array<Item> {
 /**
  * 查找所有 I18N
  */
-export function findAllI18N() {
+export function findAllI18N(): void {
   const I18NText = getI18N();
   const allItems = extractObject(I18NText);
   const langPrefix = getTargetLangPath(vscode.window.activeTextEditor!.document.uri.path) || LANG_PREFIX;
@@ -104,7 +104,7 @@ export function findAllI18N() {
         vscode.window.showInformationMessage('未被使用！');
       }
     } catch (e) {
-      debugger;
+      console.error(e);
     }
   });
 }
@@ -112,7 +112,7 @@ export function findAllI18N() {
 /**
  * 查找 I18N
  */
-export function findI18N() {
+export function findI18N(): void {
   const document = vscode.window.activeTextEditor!.document;
   const code = document.getText();
   const positions = findI18NPositions(code);

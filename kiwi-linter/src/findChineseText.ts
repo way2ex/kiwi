@@ -8,8 +8,6 @@ import * as compiler from '@angular/compiler';
 import { DOUBLE_BYTE_REGEX } from './const';
 import { trimWhiteSpace } from './parserUtils';
 import { removeFileComment } from './astUtils';
-import { transerI18n, findVueText } from './babelUtil';
-import * as compilerVue from 'vue-template-compiler';
 /**
  * 查找 Ts 文件中的中文
  * @param code
@@ -21,6 +19,8 @@ function findTextInTs(code: string, fileName: string) {
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   function visit(node: ts.Node) {
+    const { pos, end } = node;
+    let templateContent = code.slice(pos, end);
     switch (node.kind) {
       case ts.SyntaxKind.StringLiteral: {
         /** 判断 Ts 中的字符串含有中文 */
@@ -87,8 +87,6 @@ function findTextInTs(code: string, fileName: string) {
         break;
       }
       case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-        const { pos, end } = node;
-        let templateContent = code.slice(pos, end);
         templateContent = templateContent.toString().replace(/\$\{[^}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
@@ -103,58 +101,6 @@ function findTextInTs(code: string, fileName: string) {
             isString: true
           });
         }
-    }
-
-    ts.forEachChild(node, visit);
-  }
-  ts.forEachChild(ast, visit);
-
-  return matches;
-}
-function findTextInVueTs(code: string, fileName: string, startNum: number) {
-  const matches: unknown[] = [];
-  const activeEditor = vscode.window.activeTextEditor!;
-  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
-
-  function visit(node: ts.Node) {
-    switch (node.kind) {
-      case ts.SyntaxKind.StringLiteral: {
-        /** 判断 Ts 中的字符串含有中文 */
-        const { text } = node as ts.StringLiteral;
-        if (text.match(DOUBLE_BYTE_REGEX)) {
-          const start = node.getStart();
-          const end = node.getEnd();
-          /** 加一，减一的原因是，去除引号 */
-          const startPos = activeEditor.document.positionAt(start + 1 + startNum);
-          const endPos = activeEditor.document.positionAt(end - 1 + startNum);
-          const range = new vscode.Range(startPos, endPos);
-          matches.push({
-            range,
-            text,
-            isString: true
-          });
-        }
-        break;
-      }
-      case ts.SyntaxKind.TemplateExpression: {
-        const { pos, end } = node;
-        let templateContent = code.slice(pos, end);
-        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
-        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
-          const start = node.getStart();
-          const end = node.getEnd();
-          /** 加一，减一的原因是，去除`号 */
-          const startPos = activeEditor.document.positionAt(start + 1 + startNum);
-          const endPos = activeEditor.document.positionAt(end - 1 + startNum);
-          const range = new vscode.Range(startPos, endPos);
-          matches.push({
-            range,
-            text: code.slice(start + 1, end - 1),
-            isString: true
-          });
-        }
-        break;
-      }
     }
 
     ts.forEachChild(node, visit);
@@ -241,117 +187,12 @@ function findTextInHtml(code) {
 }
 
 /**
- * vue文件查找
- * @param code
- * @param fileName
- * @question $符敏感
- */
-function findTextInVue(code, fileName) {
-  const rexspace1 = new RegExp(/&ensp;/, 'g');
-  const rexspace2 = new RegExp(/&emsp;/, 'g');
-  const rexspace3 = new RegExp(/&nbsp;/, 'g');
-  code = code
-    .replace(rexspace1, 'ccsp&;')
-    .replace(rexspace2, 'ecsp&;')
-    .replace(rexspace3, 'ncsp&;');
-  const coverRex1 = new RegExp(/ccsp&;/, 'g');
-  const coverRex2 = new RegExp(/ecsp&;/, 'g');
-  const coverRex3 = new RegExp(/ncsp&;/, 'g');
-  const activeTextEditor = vscode.window.activeTextEditor!;
-  const matches: unknown[] = [];
-  let result;
-  const { document } = activeTextEditor;
-  const vueObejct = compilerVue.compile(code.toString(), { outputSourceRange: true })!;
-  const vueAst = vueObejct.ast!;
-  const expressTemp = findVueText(vueAst, code);
-  (expressTemp as any[]).forEach(item => {
-    const nodeValue = code.slice(item.start, item.end);
-    const startPos = document.positionAt(item.start + nodeValue.indexOf(item.text));
-    const endPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + item.text.length);
-    const range = new vscode.Range(startPos, endPos);
-
-    matches.push({
-      arrf: [item.start, item.end],
-      range,
-      text: item.text.trimRight(),
-      isString: true,
-      isInTemplate: true,
-      isAttr: item.isAttr,
-      attrInfo: item.attrInfo
-    });
-  });
-  const outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
-  let vueTemp: string[] = transerI18n(outcode, 'as.vue', null);
-  /**删除所有的html中的头部空格 */
-  vueTemp = vueTemp.map(item => {
-    return item.trim();
-  });
-  vueTemp = [...new Set(vueTemp)];
-  vueTemp
-    .filter(item => {
-      return !matches.find((m: any) => m.text === item);
-    })
-    .forEach(item => {
-      const items = item
-        .replace(/\{/g, '\\{')
-        .replace(/\}/g, '\\}')
-        .replace(/\$/g, '\\$')
-        .replace(/\(/g, '\\(')
-        .replace(/\)/g, '\\)')
-        .replace(/\+/g, '\\+')
-        .replace(/\*/g, '\\*')
-        .replace(/\^/g, '\\^');
-      const rex = new RegExp(items, 'g');
-      while ((result = rex.exec(code))) {
-        const res = result;
-        let last = rex.lastIndex;
-        last = last - (res[0].length - res[0].trimRight().length);
-        const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
-        matches.push({
-          arrf: [res.index, last],
-          range,
-          text: res[0]
-            .trimRight()
-            .replace(coverRex1, '&ensp;')
-            .replace(coverRex2, '&emsp;')
-            .replace(coverRex3, '&nbsp;'),
-          isString:
-            (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
-            (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")
-              ? true
-              : false
-        });
-      }
-    });
-  const matchesTemp: any[] = matches;
-  const matchesTempResult = matchesTemp.filter((item, index) => {
-    let canBe = true;
-    matchesTemp.forEach(items => {
-      if (
-        (item.arrf[0] > items.arrf[0] && item.arrf[1] <= items.arrf[1]) ||
-        (item.arrf[0] >= items.arrf[0] && item.arrf[1] < items.arrf[1]) ||
-        (item.arrf[0] > items.arrf[0] && item.arrf[1] < items.arrf[1])
-      ) {
-        canBe = false;
-      }
-    });
-    if (canBe) {
-      return item;
-    }
-  });
-  const sfc: compilerVue.SFCDescriptor = compilerVue.parseComponent(code.toString());
-  return matchesTempResult.concat(findTextInVueTs(sfc.script!.content, fileName, sfc.script!.start!));
-}
-/**
  * 递归匹配代码的中文
  * @param code
  */
-export function findChineseText(code: string, fileName: string) {
+export function findChineseText(code: string, fileName: string): unknown {
   if (fileName.endsWith('.html')) {
     return findTextInHtml(code);
-  }
-  if (fileName.endsWith('.vue')) {
-    return findTextInVue(code, fileName);
   }
   return findTextInTs(code, fileName);
 }
