@@ -51,7 +51,7 @@ export function triggerUpdateDecorations(callback?) {
       prevChineseCharDecoration = chineseCharDecoration;
       callback(targetStrs);
     } catch (e) {
-      vscode.window.showErrorMessage(e);
+      vscode.window.showErrorMessage((e as Error).message);
     }
   }, 500);
 }

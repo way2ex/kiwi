@@ -350,3 +350,22 @@ export function getKiwiConfig(key?: string | undefined): IKiwiConfig | undefined
 export function getEndOfLine(eol: vscode.EndOfLine): string {
   return eol === vscode.EndOfLine.LF ? '\n' : '\r\n';
 }
+
+export async function pickLangFile(): Promise<string | undefined> {
+  const langPaths = getCurrentProjectLangPathList();
+  const workspacePath = getWorkspacePath();
+  const fileName = await vscode.window
+    .showQuickPick(
+      langPaths.map(fullPath => {
+        if (fullPath.includes(workspacePath)) {
+          return fullPath.replace(workspacePath, '');
+        }
+        return fullPath;
+      })
+    )
+    .then(res => res);
+  if (!fileName) {
+    return;
+  }
+  return workspacePath + fileName;
+}

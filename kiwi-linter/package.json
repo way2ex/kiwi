@@ -3,7 +3,7 @@
 	"displayName": "better-i18n-linter",
 	"publisher": "justinzhu",
 	"description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
-	"version": "1.4.9",
+	"version": "1.4.10",
 	"engines": {
 		"vscode": "^1.50.0"
 	},
@@ -67,6 +67,10 @@
 		},
 		"commands": [
 			{
+				"title": "Extract Chinese",
+				"command": "better-i18n-linter.extractAllI18N"
+			},
+			{
 				"command": "better-i18n-linter.replaceCommon",
 				"title": "I18N Linter: Replace Common String Literals to I18N variables"
 			},
@@ -94,7 +98,16 @@
 				"key": "cmd+ctrl+r",
 				"mac": "cmd+ctrl+r"
 			}
-		]
+		],
+		"menus": {
+			"editor/context": [
+				{
+					"when": "resourceLangId =~ /vue|javascript|typescript/",
+					"command": "better-i18n-linter.extractAllI18N",
+					"group": "z_commands"
+				}
+			]
+		}
 	},
 	"keywords": [
 		"React",

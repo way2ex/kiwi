@@ -55,7 +55,7 @@ function prettierFile(fileContent: string) {
       singleQuote: true
     });
   } catch (e) {
-    console.error(`代码格式化报错！${e.toString()}\n代码为：${fileContent}`);
+    console.error(`代码格式化报错！${(e as Error).toString()}\n代码为：${fileContent}`);
     return fileContent;
   }
 }
@@ -100,25 +100,26 @@ export function addImportToMainLangFile(newFilename: string) {
 }
 
 /**
- * 向文件中插入一个键值对，目前只考虑简单的情况，且只支持插入一级
- * @param key 插入的键
- * @param value 插入的值
+ * 向文件中插入多个键值对，目前只考虑简单的情况，且只支持插入一级
+ * @param list 要插入的键值对
  * @param fileUri 文件地址
  */
 export async function insertKeyValueToFile(
-  key: string,
-  target: TargetString,
+  list: { key: string; target: TargetString }[],
   targetFileName: string
 ): Promise<boolean> {
   const fileContent = fs.readFileSync(targetFileName, { encoding: 'utf8' });
   const lines = fileContent.split('\n');
-  const realKey = /^[0-9]/.test(key) ? `'${key}'` : key;
-  let value = target.content;
-  if (target.type === TargetTypes.TEMPLATE_EXPRESSION && target.expressions.length) {
-    // todo: 这里只适用于简单情况
-    value = formatTemplateString(value);
-  }
-  const newLine = `    ${realKey}: '${value}',\n`;
+  const newLines = list.map(({ key, target }) => {
+    const realKey = /^[0-9]/.test(key) ? `'${key}'` : key;
+    let value = target.content;
+    if (target.type === TargetTypes.TEMPLATE_EXPRESSION && target.expressions.length) {
+      // todo: 这里只适用于简单情况
+      value = formatTemplateString(value);
+    }
+    const newLine = `    ${realKey}: '${value}',\n`;
+    return newLine;
+  });
   const pattern = /export\s*default\s*\{/;
 
   const exportDefaultLine = lines.findIndex(line => {
@@ -131,7 +132,7 @@ export async function insertKeyValueToFile(
   }
   const position = new vscode.Position(exportDefaultLine + 1, 0);
   const edit = new vscode.WorkspaceEdit();
-  edit.insert(vscode.Uri.file(targetFileName), position, newLine);
+  edit.insert(vscode.Uri.file(targetFileName), position, newLines.join(''));
   vscode.workspace.applyEdit(edit);
   const document = await vscode.workspace.openTextDocument(targetFileName);
   return document.save();
