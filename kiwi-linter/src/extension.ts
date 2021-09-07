@@ -8,13 +8,20 @@ import * as fs from 'fs-extra';
 import { getSuggestLangObj } from './getLangData';
 import { DIR_ADAPTOR } from './const';
 import { findI18N, searchI18NInAllFiles } from './findAllI18N';
-import { createMd5, findMatchKey, getCurrentProjectLangPathList, getWorkspacePath } from './utils';
+import {
+  createMd5,
+  findMatchKey,
+  getCurrentProjectLangPathList,
+  getLangJson,
+  getWorkspacePath,
+  pickLangFile
+} from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { replaceAndUpdate, replaceTargetString } from './replaceAndUpdate';
 import { getConfiguration, getConfigFile, getKiwiLinterConfigFile } from './utils';
 import { insertKeyValueToFile } from './file';
 import { TargetString } from './search-text/types';
-import { ExtractI18nArgs, EXTRACT_I18N } from './const/commonds';
+import { ExtractI18nArgs, EXTRACT_ALL_I18N, EXTRACT_I18N } from './const/commonds';
 
 /**
  * 主入口文件
@@ -131,33 +138,68 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(EXTRACT_I18N.command, async (args: ExtractI18nArgs) => {
       const { key, value, targets, autoGenerateKey } = args;
       if (key) {
-        await replaceTargetString(targets, key);
+        await replaceTargetString([{ targets, key }]);
         vscode.window.showInformationMessage(`成功替换${targets.length}处文案`);
         return;
       }
       if (autoGenerateKey) {
         const hashKey = createMd5(value);
-        const langPaths = getCurrentProjectLangPathList();
-        const workspacePath = getWorkspacePath();
-        const fileName = await vscode.window
-          .showQuickPick(
-            langPaths.map(fullPath => {
-              if (fullPath.includes(workspacePath)) {
-                return fullPath.replace(workspacePath, '');
-              }
-              return fullPath;
-            })
-          )
-          .then(res => res);
-        if (!fileName) {
+        const filePath = await pickLangFile();
+        if (!filePath) {
           return;
         }
-        await insertKeyValueToFile(hashKey, targets[0]!, workspacePath + fileName!);
-        await replaceTargetString(targets, hashKey);
+        await insertKeyValueToFile([{ key: hashKey, target: targets[0]! }], filePath);
+        await replaceTargetString([{ targets, key: hashKey }]);
         vscode.window.showInformationMessage(`成功增加 key 并替换${targets.length}处文案`);
         return;
       }
       // todo: 自定义输入key
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand(EXTRACT_ALL_I18N.command, async (editor, edit, args) => {
+      console.log(editor.document.uri);
+      console.log(targetStrs);
+      const filePath = await pickLangFile();
+      if (!filePath) {
+        return;
+      }
+      // const langData = getLangJson(filePath);
+      const langData = getSuggestLangObj();
+      const valueKeyMap = Object.entries(langData).reduce((acc, [key, val]) => {
+        acc[val] = key;
+        return acc;
+      }, {});
+      const kvListToInsert: { key: string; target: TargetString }[] = [];
+      targetStrs.forEach(target => {
+        if (valueKeyMap[target.content]) {
+          return;
+        }
+        const key = createMd5(target.content);
+        kvListToInsert.push({
+          target,
+          key
+        });
+        valueKeyMap[target.content] = key;
+      });
+      await insertKeyValueToFile(kvListToInsert, filePath);
+
+      const targetsToReplace: Record<string, { targets: TargetString[]; key: string }> = {};
+      targetStrs.forEach(target => {
+        const key = valueKeyMap[target.content];
+        if (!targetsToReplace[target.content]) {
+          targetsToReplace[target.content] = {
+            targets: [target],
+            key
+          };
+        } else {
+          targetsToReplace[target.content].targets.push(target);
+        }
+      });
+      await replaceTargetString(Object.values(targetsToReplace));
+      vscode.window.showInformationMessage(`成功增加 key 并替换${targetStrs.length}处文案`);
+      return;
     })
   );
 

@@ -92,54 +92,56 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
     // 若更新成功再替换代码
     return vscode.workspace.applyEdit(edit);
   } catch (e) {
-    return Promise.reject(e.message);
+    return Promise.reject((e as Error).message);
   }
 }
 
 /**
  * 更新文件
- * @param arg  目标字符串对象
- * @param val  目标 key
- * @param validateDuplicate 是否校验文件中已经存在要写入的 key
+ * @param {Array} list  目标字符串和对应的key的列表
  */
-export async function replaceTargetString(targets: TargetString[], key: string): Promise<boolean> {
+export async function replaceTargetString(list: { targets: TargetString[]; key: string }[]): Promise<boolean> {
   const { document } = getActiveTextEditor();
   const curFilename = document.fileName;
   // const isHtmlFile = curFilename.endsWith('.html');
   const isVueFile = curFilename.endsWith('.vue');
-  const i18nExp = getI18NExp(key);
+  let shouldImportI18N = false;
   const edit = new vscode.WorkspaceEdit();
-  let shuldImportI18N = false;
-  targets.forEach(target => {
-    const { type, content, start, end, source } = target;
-    let range: vscode.Range;
-    let newExp = i18nExp;
-    if (
-      (target.type === TargetTypes.EXPRESSION || target.type === TargetTypes.TEMPLATE_EXPRESSION) &&
-      (!isVueFile || target.isInSfcScript)
-    ) {
-      shuldImportI18N = true;
-    }
-    if (type === TargetTypes.EXPRESSION) {
-      range = getRangeByOffset(source.start, source.end);
-    } else if (target.type === TargetTypes.TEMPLATE_EXPRESSION) {
-      const keyValuePairs = target.expressions.map((exp, index) => {
-        return `val${index}: ${exp.content}`;
-      });
-      newExp = `I18N.template(${i18nExp}, { ${keyValuePairs.join(', ')} })`;
-      range = getRangeByOffset(source.start, source.end);
-    } else if (target.type === TargetTypes.VUE_TEXT) {
-      newExp = `{{${i18nExp}}}`;
-      range = getRangeByOffset(start, end);
-    } else if (target.type === TargetTypes.ATTRIBUTE) {
-      newExp = `:${source.content.replace(content, i18nExp)}`;
-      range = getRangeByOffset(source.start, source.end);
-    } else {
-      return false;
-    }
-    edit.replace(document.uri, range, newExp);
+
+  list.forEach(({ targets, key }) => {
+    const i18nExp = getI18NExp(key);
+    targets.forEach(target => {
+      const { type, content, start, end, source } = target;
+      let range: vscode.Range;
+      let newExp = i18nExp;
+      if (
+        (target.type === TargetTypes.EXPRESSION || target.type === TargetTypes.TEMPLATE_EXPRESSION) &&
+        (!isVueFile || target.isInSfcScript)
+      ) {
+        shouldImportI18N = true;
+      }
+      if (type === TargetTypes.EXPRESSION) {
+        range = getRangeByOffset(source.start, source.end);
+      } else if (target.type === TargetTypes.TEMPLATE_EXPRESSION) {
+        const keyValuePairs = target.expressions.map((exp, index) => {
+          return `val${index}: ${exp.content}`;
+        });
+        newExp = `I18N.template(${i18nExp}, { ${keyValuePairs.join(', ')} })`;
+        range = getRangeByOffset(source.start, source.end);
+      } else if (target.type === TargetTypes.VUE_TEXT) {
+        newExp = `{{${i18nExp}}}`;
+        range = getRangeByOffset(start, end);
+      } else if (target.type === TargetTypes.ATTRIBUTE) {
+        newExp = `:${source.content.replace(content, i18nExp)}`;
+        range = getRangeByOffset(source.start, source.end);
+      } else {
+        return false;
+      }
+      edit.replace(document.uri, range, newExp);
+    });
   });
-  if (shuldImportI18N) {
+
+  if (shouldImportI18N) {
     insertImportIfNeed(document, edit);
   }
   await vscode.workspace.applyEdit(edit);
