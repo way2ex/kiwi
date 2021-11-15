@@ -223,7 +223,7 @@ export function translateText(text: string): string {
  */
 export function getTargetLangPath(currentFilePath: string): string | string[] {
   const configFile = `${vscode.workspace.workspaceFolders![0].uri.fsPath}/.kiwi`;
-  let targetLangPath = '';
+  let targetLangPath = 'src/lang/zh-CN/';
 
   try {
     if (fs.existsSync(configFile)) {
@@ -274,7 +274,10 @@ export function getCurrentProjectLangPath(): string {
 
 export function getCurrentProjectLangPathList(): string[] {
   const globExp = getCurrentProjectLangPath();
-  const paths = globby.sync(globExp);
+  const paths = globby.sync(globExp, {
+    cwd: vscode.workspace.workspaceFolders![0].uri.fsPath,
+    absolute: true
+  });
   return paths;
 }
 
@@ -367,5 +370,5 @@ export async function pickLangFile(): Promise<string | undefined> {
   if (!fileName) {
     return;
   }
-  return workspacePath + fileName;
+  return workspacePath + (fileName.startsWith('/') ? fileName : `/${fileName}`);
 }
