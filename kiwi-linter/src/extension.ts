@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext): void {
     /** 存在配置文件则开启 */
     return;
   }
-  console.log('Congratulations, your extension "kiwi-linter" is now active!');
+  console.log('Congratulations, your extension "better-i18n-linter" is now active!');
   context.subscriptions.push(vscode.commands.registerCommand('better-i18n-linter.findAllI18N', searchI18NInAllFiles));
   let targetStrs: TargetString[] = [];
   let finalLangObj: Record<string, string> = {};
@@ -148,7 +148,10 @@ export function activate(context: vscode.ExtensionContext): void {
         if (!filePath) {
           return;
         }
-        await insertKeyValueToFile([{ key: hashKey, target: targets[0]! }], filePath);
+        const res = await insertKeyValueToFile([{ key: hashKey, target: targets[0]! }], filePath);
+        if (!res) {
+          return;
+        }
         await replaceTargetString([{ targets, key: hashKey }]);
         vscode.window.showInformationMessage(`成功增加 key 并替换${targets.length}处文案`);
         return;
@@ -159,8 +162,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.commands.registerTextEditorCommand(EXTRACT_ALL_I18N.command, async (editor, edit, args) => {
-      console.log(editor.document.uri);
-      console.log(targetStrs);
       const filePath = await pickLangFile();
       if (!filePath) {
         return;
@@ -183,7 +184,10 @@ export function activate(context: vscode.ExtensionContext): void {
         });
         valueKeyMap[target.content] = key;
       });
-      await insertKeyValueToFile(kvListToInsert, filePath);
+      const res = await insertKeyValueToFile(kvListToInsert, filePath);
+      if (!res) {
+        return;
+      }
 
       const targetsToReplace: Record<string, { targets: TargetString[]; key: string }> = {};
       targetStrs.forEach(target => {
