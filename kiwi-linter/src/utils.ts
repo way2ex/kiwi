@@ -5,10 +5,10 @@
 import * as _ from 'lodash';
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
-import * as path from 'path';
 import * as crypto from 'crypto';
 import * as globby from 'globby';
 import * as GoogleTranslate from 'google-translate';
+import { workspaceManager } from './workspace';
 interface NestedObj {
   [key: string]: NestedObj | string | string[];
 }
@@ -34,56 +34,12 @@ export function flatten(obj: NestedObj, prefix?: string): Record<string, string>
 }
 
 /**
- * 查找 text 在当前code中的位置
- */
-export function findPositionInCode(text: string, code: string): null | vscode.Position {
-  const lines = code.split('\n');
-  const lineNum = lines.findIndex(line => line.includes(text));
-
-  if (lineNum === -1) {
-    return null;
-  }
-
-  let chNum = lines[lineNum].indexOf(text);
-
-  if (text.startsWith(' ')) {
-    chNum += 1;
-  }
-
-  return new vscode.Position(lineNum, chNum);
-}
-
-export function findMatchKey(langObj: Record<string, string>, text: string): null | string {
-  for (const key in langObj) {
-    if (langObj[key] === text) {
-      return key;
-    }
-  }
-
-  return null;
-}
-
-/**
- * 获取文件夹下所有文件
- * @function getAllFiles
- * @param  {string} dir Dir path string.
- * @return {string[]} Array with all file names that are inside the directory.
- */
-export const getAllFiles = (dir: string): string[] =>
-  fs.readdirSync(dir).reduce<string[]>((files, file) => {
-    // 避免读取node_modules造成性能问题
-    if (file === 'node_modules') {
-      return [...files];
-    }
-    const name = path.join(dir, file);
-    const isDirectory = fs.statSync(name).isDirectory();
-    return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];
-  }, []);
-
-/**
  * 获取文件 Json
  */
 export function getLangJson(fileName: string): Record<string, string> {
+  if (!fs.existsSync(fileName)) {
+    return {};
+  }
   const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
   const matchRes = fileContent.match(/export\s*default\s*({[\s\S]+);?$/);
   if (!matchRes || !matchRes[1]) {
@@ -355,20 +311,10 @@ export function getEndOfLine(eol: vscode.EndOfLine): string {
 }
 
 export async function pickLangFile(): Promise<string | undefined> {
-  const langPaths = getCurrentProjectLangPathList();
-  const workspacePath = getWorkspacePath();
-  const fileName = await vscode.window
-    .showQuickPick(
-      langPaths.map(fullPath => {
-        if (fullPath.includes(workspacePath)) {
-          return fullPath.replace(workspacePath, '');
-        }
-        return fullPath;
-      })
-    )
-    .then(res => res);
+  const langPaths = workspaceManager.getCurrentWorkspace().getLangPaths();
+  const fileName = await vscode.window.showQuickPick(langPaths).then(res => res);
   if (!fileName) {
     return;
   }
-  return workspacePath + (fileName.startsWith('/') ? fileName : `/${fileName}`);
+  return fileName;
 }

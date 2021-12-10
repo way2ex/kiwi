@@ -8,6 +8,7 @@ import * as minimatch from 'minimatch';
 import { getConfiguration } from './utils';
 import { searchChinese } from './search-text';
 import { TargetString } from './search-text/types';
+import { workspaceManager } from './workspace';
 
 /**
  * 中文的标记，红框样式
@@ -33,7 +34,7 @@ function getChineseCharDecoration() {
 
 let timeout;
 let prevChineseCharDecoration: vscode.TextEditorDecorationType;
-export function triggerUpdateDecorations(callback?) {
+export function triggerUpdateDecorations(callback?: (targetStrs: TargetString[]) => void): void {
   if (timeout) {
     clearTimeout(timeout);
   }
@@ -49,7 +50,7 @@ export function triggerUpdateDecorations(callback?) {
     try {
       const { targetStrs, chineseCharDecoration } = updateDecorations()!;
       prevChineseCharDecoration = chineseCharDecoration;
-      callback(targetStrs);
+      callback && callback(targetStrs);
     } catch (e) {
       //   vscode.window.showErrorMessage((e as Error).message);
     }
@@ -61,14 +62,12 @@ export function triggerUpdateDecorations(callback?) {
  */
 function matchPattern() {
   const activeEditor = vscode.window.activeTextEditor!;
-  const pattern = getConfiguration('i18nFilesPattern');
+  const workspace = workspaceManager.getCurrentWorkspace()!;
+  const pattern = workspace.config.i18nFilesPattern;
   if (
     activeEditor &&
     pattern !== '' &&
-    !minimatch(
-      activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders![0].uri.fsPath + '/', ''),
-      pattern
-    )
+    !minimatch(activeEditor.document.uri.fsPath.replace(workspace.uri.fsPath + '/', ''), pattern)
   ) {
     return false;
   } else {
@@ -78,13 +77,18 @@ function matchPattern() {
 /**
  * 更新标记
  */
-export function updateDecorations() {
+export function updateDecorations():
+  | {
+      targetStrs: TargetString[];
+      chineseCharDecoration: vscode.TextEditorDecorationType;
+    }
+  | undefined {
   const activeEditor = vscode.window.activeTextEditor!;
-  const currentFilename = activeEditor.document.fileName;
-  const chineseCharDecoration = getChineseCharDecoration();
   if (!activeEditor) {
     return;
   }
+  const currentFilename = activeEditor.document.fileName;
+  const chineseCharDecoration = getChineseCharDecoration();
 
   const text = activeEditor.document.getText();
   // 清空上一次的保存结果
@@ -92,7 +96,7 @@ export function updateDecorations() {
   const chineseChars: vscode.DecorationOptions[] = [];
 
   targetStrs = searchChinese(text, currentFilename);
-  targetStrs.map(match => {
+  targetStrs.forEach(match => {
     const decoration = {
       range: new vscode.Range(
         activeEditor.document.positionAt(match.start),
@@ -109,7 +113,7 @@ export function updateDecorations() {
   }
 
   /** 设置 I18N 的提示 */
-  setLineDecorations(activeEditor);
+  setLineDecorations();
   /** 设置中文的提示 */
   activeEditor.setDecorations(chineseCharDecoration, chineseChars);
 

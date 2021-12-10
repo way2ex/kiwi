@@ -6,7 +6,7 @@
         "commonjs": true
     },
     "parserOptions": {
-        "ecmaVersion": 6,
+        "ecmaVersion": "latest",
         "sourceType": "module"
     },
     "plugins": [
@@ -26,7 +26,7 @@
         "no-throw-literal": "warn",
         "semi": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
-		"no-control-regex": "off"
+		    "no-control-regex": "off"
     },
     "ignorePatterns": [
         "out",

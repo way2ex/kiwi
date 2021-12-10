@@ -13,6 +13,7 @@ import {
   DecorationOptions
 } from 'vscode';
 import { findI18NPositions, Position } from './findI18NPositions';
+import { getActiveTextEditor } from './utils';
 
 /**
  * I18N 中文显示位置
@@ -31,19 +32,19 @@ const annotationDecoration: TextEditorDecorationType = window.createTextEditorDe
  * @param editorText
  * @param toLastCol 是否是行尾
  */
-export function transformPosition(pos: Position, editorText: string, toLastCol?: boolean) {
+export function transformPosition(pos: Position, editorText: string, toLastCol?: boolean): vscode.Range {
   const { start, code } = pos;
   const width = code.length;
   let lines, line, ch;
   if (start !== undefined) {
     lines = editorText.slice(0, start + 1).split('\n');
     /** 当前所在行 */
-    line = (pos as any).line || lines.length - 1;
+    line = (pos as Position).line || lines.length - 1;
     /** I18N 开始的 col */
     ch = lines[line].length;
   } else {
     lines = editorText.split('\n');
-    line = (pos as any).line;
+    line = (pos as Position).line;
     ch = lines[line].length;
   }
 
@@ -61,9 +62,9 @@ export function transformPosition(pos: Position, editorText: string, toLastCol?:
 
 /**
  * 设置行内提示
- * @param activeEditor
  */
-export function setLineDecorations(activeEditor) {
+export function setLineDecorations(): void {
+  const activeEditor = getActiveTextEditor();
   const code = activeEditor.document.getText();
   const positions = findI18NPositions(code);
   let decorations: DecorationOptions[] = [];
