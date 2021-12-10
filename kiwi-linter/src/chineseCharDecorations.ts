@@ -61,12 +61,12 @@ export function triggerUpdateDecorations(callback?: (targetStrs: TargetString[])
  * 查看文件名是否匹配
  */
 function matchPattern() {
-  const activeEditor = vscode.window.activeTextEditor!;
+  const activeEditor = vscode.window.activeTextEditor;
   const workspace = workspaceManager.getCurrentWorkspace()!;
   const pattern = workspace.config.i18nFilesPattern;
   if (
-    activeEditor &&
-    pattern !== '' &&
+    !activeEditor ||
+    !pattern ||
     !minimatch(activeEditor.document.uri.fsPath.replace(workspace.uri.fsPath + '/', ''), pattern)
   ) {
     return false;
