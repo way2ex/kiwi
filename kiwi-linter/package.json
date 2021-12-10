@@ -3,7 +3,7 @@
 	"displayName": "better-i18n-linter",
 	"publisher": "justinzhu",
 	"description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
-	"version": "1.4.13",
+	"version": "1.4.14",
 	"engines": {
 		"vscode": "^1.50.0"
 	},
@@ -38,11 +38,6 @@
 					"default": true,
 					"description": "Mark string literals in editor so you can quickly spot on them"
 				},
-				"better-i18n-linter.langPrefix": {
-					"type": "string",
-					"default": ".kiwi/zh-CN/",
-					"description": "Language store path"
-				},
 				"better-i18n-linter.showOverviewRuler": {
 					"type": "boolean",
 					"default": true,
@@ -57,11 +52,6 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Add a light blob beside string literal and provide I18N variable replacement suggestions"
-				},
-				"better-i18n-linter.i18nFilesPattern": {
-					"type": "string",
-					"default": "**/src/**/*.+(vue|js*|html|ts*)",
-					"description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
 				}
 			}
 		},
@@ -166,7 +156,7 @@
 		"crypto": "^1.0.1",
 		"find-in-files": "^0.5.0",
 		"fs-extra": "^7.0.1",
-		"globby": "^7.1.1",
+		"glob": "^7.1.7",
 		"google-translate": "^2.2.0",
 		"lodash": "^4.17.4",
 		"minimatch": "^3.0.4",

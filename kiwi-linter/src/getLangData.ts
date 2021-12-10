@@ -2,10 +2,8 @@
  * @author linhuiw
  * @desc 获取语言文件
  */
-import { flatten, getLangJson, getCurrentProjectLangPath } from './utils';
-import * as globby from 'globby';
+import { getLangJson } from './utils';
 import * as fs from 'fs';
-import { I18N_GLOB } from './const';
 
 /**
  * 获取对应文件的语言
@@ -18,29 +16,13 @@ export function getLangData(fileName: string): Record<string, unknown> {
   }
 }
 
-/**
- * 获取项目配置的所有的中文文案
- * @returns {Object} 包含所有中文文案的对象
- */
-export function getI18N(): Record<string, string> {
-  const _I18N_GLOB = getCurrentProjectLangPath() || I18N_GLOB;
-  const paths = globby.sync(_I18N_GLOB);
-  let langObj = {};
-  langObj = paths.reduce((prev, curr) => {
-    const fileContent = getLangData(curr);
+export function getLangDataByPaths(pathList: string[]): Record<string, string> {
+  return pathList.reduce((prev, curr) => {
+    const fileContent = getLangJson(curr);
     const jsObj = fileContent;
     return {
       ...prev,
       ...jsObj
     };
   }, {});
-  return langObj;
-}
-/**
- * 获取全部语言, 展平
- */
-export function getSuggestLangObj(): Record<string, string> {
-  const langObj = getI18N();
-  const finalLangObj = flatten(langObj) as Record<string, string>;
-  return finalLangObj;
 }

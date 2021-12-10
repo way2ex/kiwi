@@ -3,8 +3,8 @@
  */
 
 import * as _ from 'lodash';
-import { getI18N } from './getLangData';
 import { getActiveTextEditor, getEndOfLine } from './utils';
+import { workspaceManager } from './workspace';
 
 class Cache {
   memories = [] as Array<{ code: string; positions: Position[] }>;
@@ -67,12 +67,12 @@ function getRegexMatches(I18N, code: string): Position[] {
  * @param code
  */
 export function findI18NPositions(code: string): Position[] {
-  //   const cachedPoses = cache.getPositionsByCode(code);
-  //   if (cachedPoses) {
-  //     return cachedPoses;
-  //   }
+  const cachedPoses = cache.getPositionsByCode(code);
+  if (cachedPoses) {
+    return cachedPoses;
+  }
 
-  const I18N = getI18N();
+  const I18N = workspaceManager.getCurrentWorkspace()?.getTargetLangData() || {};
   const positions = [] as Position[];
 
   const regexMatches = getRegexMatches(I18N, code);

@@ -65,7 +65,12 @@ default: `true`
 支持多个文件夹使用各自不同的语言包配置，只需在项目根目录下创建 `.kiwi` 文件，写入配置即可：
 ```json
 {
+    "kiwiDir": [
+      "src/common/i18n"
+    ],
     "importStatement": "import { I18N } from '@/common/i18n';",
+    "i18nFilesPattern": "src/pages/**/*.{js,vue,ts,tsx}",
+    // mono-repo 工程使用
     "projects": [
         {
             "target": "packages/package-a",
@@ -77,6 +82,8 @@ default: `true`
     ]
 }
 ```
+- `kiwiDir`: string[], 当前所有多语言文件所在的目录，例如所有多语言文件存放在 `src/common/i18n` 下，即可设置 `[src/common/i18n]`
+- `i18nFilesPattern`: string, 设置需要检测汉字的文件，支持 glob 语句,如 `src/pages/**/*.{js,vue,ts,tsx}`
 - `importStatement`: string, 当在没有导入过 `I18N` 的文件中自动提取中文时，会自动插入导入的语句。
 - `projects.target`: string, 目标文件所在的**相对**目录前缀，内部使用 `fileUri.indexOf(target)` 的方式判断是否应用该工程配置；
 - `projects.kiwiDir`: string | string[], 中文包所在的目标目录，可以配置一个或多个；
