@@ -118,6 +118,7 @@
 		"coverage": "nyc yarn test:unit:direct"
 	},
 	"devDependencies": {
+		"@types/babel__core": "^7.1.17",
 		"@types/chai": "^4.2.19",
 		"@types/fs-extra": "^9.0.11",
 		"@types/glob": "^7.1.3",

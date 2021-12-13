@@ -155,6 +155,11 @@
   resolved "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.14.5.tgz#d0f0e277c512e0c938277faa85a3968c9a44c0e8"
   integrity sha512-5lsetuxCLilmVGyiLEfoHBRX8UCFD+1m2x3Rj97WrW3V7H3u4RWRXA4evMjImCsin2J2YT0QaVDGf+z8ondbAg==
 
+"@babel/helper-validator-identifier@^7.15.7":
+  version "7.15.7"
+  resolved "https://npm.corp.kuaishou.com/@babel%2fhelper-validator-identifier/-/helper-validator-identifier-7.15.7.tgz#220df993bfe904a4a6b02ab4f3385a5ebf6e2389"
+  integrity sha1-Ig35k7/pBKSmsCq08zhaXr9uI4k=
+
 "@babel/helper-validator-option@^7.14.5":
   version "7.14.5"
   resolved "https://registry.npmjs.org/@babel/helper-validator-option/-/helper-validator-option-7.14.5.tgz#6e72a1fff18d5dfcb878e1e62f1a021c4b72d5a3"
@@ -177,6 +182,11 @@
     "@babel/helper-validator-identifier" "^7.14.5"
     chalk "^2.0.0"
     js-tokens "^4.0.0"
+
+"@babel/parser@^7.1.0":
+  version "7.16.4"
+  resolved "https://npm.corp.kuaishou.com/@babel%2fparser/-/parser-7.16.4.tgz#d5f92f57cf2c74ffe9b37981c0e72fee7311372e"
+  integrity sha1-1fkvV88sdP/ps3mBwOcv7nMRNy4=
 
 "@babel/parser@^7.12.0", "@babel/parser@^7.13.9", "@babel/parser@^7.14.7":
   version "7.14.7"
@@ -226,6 +236,14 @@
     "@babel/types" "^7.14.5"
     debug "^4.1.0"
     globals "^11.1.0"
+
+"@babel/types@^7.0.0", "@babel/types@^7.3.0":
+  version "7.16.0"
+  resolved "https://npm.corp.kuaishou.com/@babel%2ftypes/-/types-7.16.0.tgz#db3b313804f96aadd0b776c4823e127ad67289ba"
+  integrity sha1-2zsxOAT5aq3Qt3bEgj4SetZyibo=
+  dependencies:
+    "@babel/helper-validator-identifier" "^7.15.7"
+    to-fast-properties "^2.0.0"
 
 "@babel/types@^7.12.0", "@babel/types@^7.13.0", "@babel/types@^7.14.5":
   version "7.14.5"
@@ -291,6 +309,39 @@
   version "1.1.2"
   resolved "https://registry.npmjs.org/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
+
+"@types/babel__core@^7.1.17":
+  version "7.1.17"
+  resolved "https://npm.corp.kuaishou.com/@types%2fbabel__core/-/babel__core-7.1.17.tgz#f50ac9d20d64153b510578d84f9643f9a3afbe64"
+  integrity sha512-6zzkezS9QEIL8yCBvXWxPTJPNuMeECJVxSOhxNY/jfq9LxOTHivaYTqr37n9LknWWRTIkzqH2UilS5QFvfa90A==
+  dependencies:
+    "@babel/parser" "^7.1.0"
+    "@babel/types" "^7.0.0"
+    "@types/babel__generator" "*"
+    "@types/babel__template" "*"
+    "@types/babel__traverse" "*"
+
+"@types/babel__generator@*":
+  version "7.6.3"
+  resolved "https://npm.corp.kuaishou.com/@types%2fbabel__generator/-/babel__generator-7.6.3.tgz#f456b4b2ce79137f768aa130d2423d2f0ccfaba5"
+  integrity sha1-9Fa0ss55E392iqEw0kI9LwzPq6U=
+  dependencies:
+    "@babel/types" "^7.0.0"
+
+"@types/babel__template@*":
+  version "7.4.1"
+  resolved "https://npm.corp.kuaishou.com/@types%2fbabel__template/-/babel__template-7.4.1.tgz#3d1a48fd9d6c0edfd56f2ff578daed48f36c8969"
+  integrity sha1-PRpI/Z1sDt/Vby/1eNrtSPNsiWk=
+  dependencies:
+    "@babel/parser" "^7.1.0"
+    "@babel/types" "^7.0.0"
+
+"@types/babel__traverse@*":
+  version "7.14.2"
+  resolved "https://npm.corp.kuaishou.com/@types%2fbabel__traverse/-/babel__traverse-7.14.2.tgz#ffcd470bbb3f8bf30481678fb5502278ca833a43"
+  integrity sha1-/81HC7s/i/MEgWePtVAieMqDOkM=
+  dependencies:
+    "@babel/types" "^7.3.0"
 
 "@types/chai@^4.2.19":
   version "4.2.19"

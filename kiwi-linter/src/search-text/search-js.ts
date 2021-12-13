@@ -1,5 +1,6 @@
+import { StringLiteral } from '@babel/generator/node_modules/@babel/types';
 import * as parser from '@babel/parser';
-import traverse from '@babel/traverse';
+import traverse, { NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
 import { hasChinese } from '../pure-utils';
 
@@ -13,13 +14,15 @@ export function searchJs(code: string, offset = 0): TargetString[] {
   });
   traverse(ast, {
     enter(path) {
-      const { start, end, value, extra } = path.node;
+      const { value, extra } = path.node as StringLiteral;
+      const start = path.node.start as number;
+      const end = path.node.end as number;
       if (t.isStringLiteral(path.node) || t.isDirectiveLiteral(path.node)) {
         // console.log(path.node);
         const source: StringSource = {
-          start: start + offset,
-          end: end + offset,
-          content: extra.raw
+          start: start! + offset,
+          end: end! + offset,
+          content: extra!.raw as string
         };
         if (hasChinese(value)) {
           result.push({
@@ -50,7 +53,8 @@ export function searchJs(code: string, offset = 0): TargetString[] {
             start: start + 1 + offset,
             end: end - 1 + offset,
             expressions: expressions.map(node => {
-              const { start, end } = node;
+              const start = node.start as number;
+              const end = node.end as number;
               const exp: StringSource = {
                 start: start + offset,
                 end: end + offset,
