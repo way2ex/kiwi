@@ -44,7 +44,8 @@ export async function insertKeyValueToFile(
     edit.insert(vscode.Uri.file(targetFileName), position, newLines.join(''));
     vscode.workspace.applyEdit(edit);
     const document = await vscode.workspace.openTextDocument(targetFileName);
-    return document.save();
+    const res = await document.save();
+    return res;
   } catch (e) {
     vscode.window.showErrorMessage((e as Error).message);
     return false;
