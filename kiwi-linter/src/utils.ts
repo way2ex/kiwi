@@ -311,10 +311,11 @@ export function getEndOfLine(eol: vscode.EndOfLine): string {
 }
 
 export async function pickLangFile(): Promise<string | undefined> {
-  const langPaths = workspaceManager.getCurrentWorkspace().getLangPaths();
-  const fileName = await vscode.window.showQuickPick(langPaths).then(res => res);
+  const curSpace = workspaceManager.getCurrentWorkspace();
+  const langPaths = curSpace.getLangPaths().map(dir => dir.replace(curSpace.uri.fsPath, ''));
+  const fileName = await vscode.window.showQuickPick(langPaths);
   if (!fileName) {
     return;
   }
-  return fileName;
+  return `${curSpace.uri.fsPath}${fileName}`;
 }
