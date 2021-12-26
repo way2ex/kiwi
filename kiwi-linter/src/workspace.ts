@@ -8,7 +8,13 @@ interface IProjectConfig {
   kiwiDir: string[];
   importStatement?: string;
 }
-interface IConfiguration {
+export interface IConfiguration {
+  // 对于中文，是否在右侧展示红色标记
+  showOverviewRuler: boolean;
+  // 是否使用红色框将中文标记
+  markStringLiterals: boolean;
+  // 标记的颜色配置
+  markColor?: string;
   // 中文语言包的前缀，相对于工程根目录的相对路径，如 packages/A/src/lang/zh-CN
   kiwiDir: string[];
   // 导入 I18N 的表达式,如
@@ -19,6 +25,9 @@ interface IConfiguration {
   projects: IProjectConfig[];
 }
 const DEFAULT_CONFIG: IConfiguration = {
+  showOverviewRuler: true,
+  markStringLiterals: true,
+  markColor: '#ff4400',
   kiwiDir: [],
   i18nFilesPattern: 'src/**/*.{js,jsx,ts,tsx,vue}',
   projects: []
