@@ -13,7 +13,7 @@ export function searchJs(code: string, offset = 0): TargetString[] {
   });
   traverse(ast, {
     enter(path) {
-      const { start, end, value, extra } = path.node;
+      const { start, end, value, extra } = path.node as any;
       if (t.isStringLiteral(path.node) || t.isDirectiveLiteral(path.node)) {
         // console.log(path.node);
         const source: StringSource = {
@@ -50,7 +50,7 @@ export function searchJs(code: string, offset = 0): TargetString[] {
             start: start + 1 + offset,
             end: end - 1 + offset,
             expressions: expressions.map(node => {
-              const { start, end } = node;
+              const { start, end } = node as any;
               const exp: StringSource = {
                 start: start + offset,
                 end: end + offset,

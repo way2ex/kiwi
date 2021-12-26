@@ -15,19 +15,19 @@ import { workspaceManager } from './workspace';
  */
 function getChineseCharDecoration() {
   // 配置提示框样式
-  const hasOverviewRuler = getConfiguration('showOverviewRuler');
-  const shouldMark = getConfiguration('markStringLiterals');
-  const color = getConfiguration('markColor') as string;
+  const curSpace = workspaceManager.getCurrentWorkspace();
+
+  const { showOverviewRuler, markStringLiterals, markColor } = curSpace?.config || {};
   return vscode.window.createTextEditorDecorationType({
-    borderWidth: shouldMark ? '1px' : undefined,
-    borderStyle: shouldMark ? 'dotted' : undefined,
-    overviewRulerColor: hasOverviewRuler ? color : undefined,
-    overviewRulerLane: hasOverviewRuler ? vscode.OverviewRulerLane.Right : undefined,
+    borderWidth: markStringLiterals ? '1px' : undefined,
+    borderStyle: markStringLiterals ? 'dotted' : undefined,
+    overviewRulerColor: showOverviewRuler ? markColor : undefined,
+    overviewRulerLane: showOverviewRuler ? vscode.OverviewRulerLane.Right : undefined,
     light: {
-      borderColor: shouldMark ? color : undefined
+      borderColor: markStringLiterals ? markColor : undefined
     },
     dark: {
-      borderColor: shouldMark ? color : undefined
+      borderColor: markStringLiterals ? markColor : undefined
     }
   });
 }

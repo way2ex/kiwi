@@ -33,33 +33,6 @@ default: `**/src/**/*.+(vue|js*|html|ts*)`
 
 待扫描的文件类型，可以基于 [minimatch](https://github.com/isaacs/minimatch) 规则进行自定义。
 
-### better-i18n-linter.markStringLiterals
-
-default: `true`
-
-是否标红中文字符串，默认开启。
-
-### better-i18n-linter.showOverviewRuler
-
-default: `true`
-
-右侧滚动条中，是否显示对应的待提取中文高亮。
-
-![](https://img.alicdn.com/tfs/TB1CHZRrxGYBuNjy0FnXXX5lpXa-1088-568.png)
-
-### better-i18n-linter.markColor
-
-default: `#ff4400`
-
-待提取文字，高亮颜色。
-
-### better-i18n-linter.enableReplaceSuggestion
-
-default: `true`
-
-是否开启一键提取中文功能。
-
-
 ## 多工程支持
 > 这个是原有的功能，不过采用了配置文件的方式而不是 VS Code 配置的方式进行配置。
 支持多个文件夹使用各自不同的语言包配置，只需在项目根目录下创建 `.kiwi` 文件，写入配置即可：
@@ -82,6 +55,9 @@ default: `true`
     ]
 }
 ```
+- `markStringLiterals`, default: `true`, 是否标红中文字符串，默认开启。
+- `showOverviewRuler`: default: `true`,右侧滚动条中，是否显示对应的待提取 ![中文高亮](https://img.alicdn.com/tfs/TB1CHZRrxGYBuNjy0FnXXX5lpXa-1088-568.png)
+- `markColor`: string, default: `#ff4400`, 待提取文字，高亮颜色
 - `kiwiDir`: string[], 当前所有多语言文件所在的目录，例如所有多语言文件存放在 `src/common/i18n` 下，即可设置 `[src/common/i18n]`
 - `i18nFilesPattern`: string, 设置需要检测汉字的文件，支持 glob 语句,如 `src/pages/**/*.{js,vue,ts,tsx}`
 - `importStatement`: string, 当在没有导入过 `I18N` 的文件中自动提取中文时，会自动插入导入的语句。
