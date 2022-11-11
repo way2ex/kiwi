@@ -159,7 +159,7 @@
 		"glob": "^7.1.7",
 		"google-translate": "^2.2.0",
 		"lodash": "^4.17.4",
-		"minimatch": "^3.0.4",
+		"minimatch": "^3.0.5",
 		"prettier": "^1.16.4",
 		"randomstring": "^1.1.5",
 		"slash2": "^2.0.0",
